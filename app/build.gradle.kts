@@ -16,9 +16,6 @@ kotlin {
 }
 
 // ---- Build settings: Gradle property > environment variable (CI) > .env file > default ----
-// The Secrets Gradle Plugin used to read the .env file as well, and its placeholder values could win
-// over the real ones, silently leaving the app unconfigured. These keys are now ignored by that plugin
-// (see the `secrets` block) and resolved only here, in one place.
 val dotEnv: Map<String, String> = rootProject.file(".env").takeIf { it.exists() }
   ?.readLines()
   ?.map { it.trim() }
@@ -35,7 +32,7 @@ fun isPlaceholder(value: String) = value.isBlank() || value.contains("YOUR_", ig
 
 android {
   namespace = "com.willykez.campconnect"
-  compileSdk { version = release(36) { minorApiLevel = 1 } }
+  compileSdk = 36
 
   defaultConfig {
     applicationId = "com.willykez.campconnect"
@@ -64,6 +61,7 @@ android {
     val releaseKeystorePath = System.getenv("KEYSTORE_PATH")
     val releaseStorePassword = System.getenv("STORE_PASSWORD")
     val releaseKeyPassword = System.getenv("KEY_PASSWORD")
+    val releaseKeyAlias = System.getenv("KEY_ALIAS") ?: "campus-connect-key"
 
     if (!releaseKeystorePath.isNullOrBlank() &&
       !releaseStorePassword.isNullOrBlank() &&
@@ -72,8 +70,9 @@ android {
       create("release") {
         storeFile = file(releaseKeystorePath)
         storePassword = releaseStorePassword
-        keyAlias = "upload"
+        keyAlias = releaseKeyAlias
         keyPassword = releaseKeyPassword
+        storeType = "PKCS12"
       }
     }
 
@@ -87,8 +86,10 @@ android {
 
   buildTypes {
     release {
-      isCrunchPngs = false
-      isMinifyEnabled = false
+      isCrunchPngs = true
+      isMinifyEnabled = true
+      isShrinkResources = true
+      
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"
@@ -101,6 +102,16 @@ android {
 
     debug {
       signingConfig = signingConfigs.getByName("debugConfig")
+    }
+  }
+
+  packaging {
+    resources {
+      excludes += "/META-INF/{AL2.0,LGPL2.1}"
+      excludes += "META-INF/DEPENDENCIES"
+      excludes += "META-INF/LICENSE*"
+      excludes += "META-INF/NOTICE*"
+      excludes += "META-INF/*.kotlin_module"
     }
   }
 
@@ -121,7 +132,7 @@ android {
 
   dependenciesInfo {
     includeInApk = false
-    includeInBundle = true
+    includeInBundle = false
   }
 }
 
@@ -129,7 +140,6 @@ secrets {
   propertiesFileName = ".env"
   defaultPropertiesFileName = ".env.example"
   ignoreList.add("FIREBASE_APPCHECK_DEBUG_TOKEN")
-  // Resolved by setting(...) above so the placeholder values in .env.example can never win.
   ignoreList.add("SUPABASE_URL")
   ignoreList.add("SUPABASE_ANON_KEY")
 }
