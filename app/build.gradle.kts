@@ -28,8 +28,6 @@ fun setting(name: String, default: String = ""): String =
     ?: dotEnv[name]
     ?: default
 
-fun isPlaceholder(value: String) = value.isBlank() || value.contains("YOUR_", ignoreCase = true)
-
 android {
   namespace = "com.willykez.campconnect"
   compileSdk = 36
@@ -184,12 +182,28 @@ dependencies {
   "ksp"(libs.moshi.kotlin.codegen)
 }
 
-// A release build must never ship without a real backend.
+// Configuration-Cache compatible verification task
+val liveUrlProvider = providers.gradleProperty("SUPABASE_URL")
+  .orElse(providers.environmentVariable("SUPABASE_URL"))
+  .orElse(provider { dotEnv["SUPABASE_URL"] ?: "" })
+
+val liveKeyProvider = providers.gradleProperty("SUPABASE_ANON_KEY")
+  .orElse(providers.environmentVariable("SUPABASE_ANON_KEY"))
+  .orElse(provider { dotEnv["SUPABASE_ANON_KEY"] ?: "" })
+
 tasks.register("verifyLiveConfig") {
+  val urlProvider = liveUrlProvider
+  val keyProvider = liveKeyProvider
+  inputs.property("supabaseUrl", urlProvider)
+  inputs.property("supabaseAnonKey", keyProvider)
+
   doLast {
-    val url = setting("SUPABASE_URL")
-    val key = setting("SUPABASE_ANON_KEY")
-    if (isPlaceholder(url) || isPlaceholder(key)) {
+    val url = urlProvider.get()
+    val key = keyProvider.get()
+    val isInvalidUrl = url.isBlank() || url.contains("YOUR_", ignoreCase = true)
+    val isInvalidKey = key.isBlank() || key.contains("YOUR_", ignoreCase = true)
+
+    if (isInvalidUrl || isInvalidKey) {
       throw GradleException(
         "SUPABASE_URL and SUPABASE_ANON_KEY are missing or still placeholders. " +
           "Set them in .env, or as GitHub repository secrets, before building a release. See README.md."
@@ -197,4 +211,5 @@ tasks.register("verifyLiveConfig") {
     }
   }
 }
+
 tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn("verifyLiveConfig") }
