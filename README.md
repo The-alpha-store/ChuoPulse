@@ -22,6 +22,13 @@ supabase/functions/          Edge Function: campus-wipe-files
 3. Build: `./gradlew :app:assembleDebug` (a release build fails fast if the two values are missing).
 4. Deploy the edge function: `supabase functions deploy campus-wipe-files`.
 
+## App manager login
+
+The manager's email (`abcplan2023@gmail.com`) is registered by the migration `20261030000000_platform_manager.sql`.
+The password is never stored in Git or in the app. Create the account in the Supabase dashboard:
+Authentication -> Users -> Add user -> email above, a strong password, "Auto Confirm User" ticked.
+It becomes the app manager automatically. Administrators then enrol an authenticator app on first sign-in.
+
 ## Release (GitHub Actions)
 
 Repository secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`,
