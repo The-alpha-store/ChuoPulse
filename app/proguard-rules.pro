@@ -1,21 +1,59 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ====================================================================
+# Android & Jetpack Compose
+# ====================================================================
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+-dontwarn androidx.compose.**
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ====================================================================
+# Kotlin Coroutines
+# ====================================================================
+-keepclassmembers class * {
+    @kotlinx.coroutines.InternalCoroutinesApi *;
+}
+-dontwarn kotlinx.coroutines.**
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ====================================================================
+# Room Database
+# ====================================================================
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.paging.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ====================================================================
+# Retrofit & OkHttp
+# ====================================================================
+-keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations
+-keepclassmembers class * {
+    @retrofit2.http.* <methods>;
+}
+-dontwarn retrofit2.**
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+# ====================================================================
+# Moshi (JSON Serialization)
+# ====================================================================
+-keepclasseswithmembers class * {
+    @com.squareup.moshi.Json <fields>;
+}
+-keepclasseswithmembers class * {
+    @com.squareup.moshi.JsonClass <fields>;
+}
+-keep class * implements com.squareup.moshi.JsonAdapter
+-keepclassmembers class * {
+    public static com.squareup.moshi.JsonAdapter jsonAdapter(com.squareup.moshi.Moshi, java.lang.reflect.Type, java.lang.annotation.Annotation[]);
+}
+-dontwarn com.squareup.moshi.**
+
+# ====================================================================
+# Firebase & ML Kit
+# ====================================================================
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+-keep class com.google.mlkit.** { *; }
+-dontwarn com.google.mlkit.**
+
+# ====================================================================
+# Coil Image Loading
+# ====================================================================
+-keep class coil.** { *; }
+-dontwarn coil.**
