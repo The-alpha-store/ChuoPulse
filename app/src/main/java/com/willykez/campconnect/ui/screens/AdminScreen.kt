@@ -71,6 +71,7 @@ fun AdminScreen(
   modifier: Modifier = Modifier
 ) {
   val pendingUsers by viewModel.pendingUsers.collectAsState()
+  androidx.compose.runtime.LaunchedEffect(Unit) { viewModel.refreshAdminData() }
   val auditLogs by viewModel.auditLogs.collectAsState()
   var selectedTab by remember { mutableStateOf(0) }
 

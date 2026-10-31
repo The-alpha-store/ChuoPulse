@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -145,6 +146,10 @@ class CampusViewModel(
 
   init {
     refreshDirectory()
+    // Whenever someone signs in (or their role changes), load what their role manages from the server.
+    viewModelScope.launch {
+      repository.currentUser.map { Triple(it.id, it.role, it.status) }.distinctUntilChanged().collect { refreshAdminData() }
+    }
   }
 
   suspend fun signInSuspend(identifier: String, password: String): AuthOutcome =
@@ -168,6 +173,18 @@ class CampusViewModel(
 
   suspend fun resetPasswordSuspend(email: String, code: String, newPassword: String): AuthOutcome =
     repository.auth.liveResetPassword(email, code, newPassword)
+
+  /** Changes my own password. Returns the reason in words when it failed, or null when it worked. */
+  suspend fun changePassword(current: String, new: String): String? =
+    when (val r = repository.auth.changePassword(current, new)) {
+      is AuthOutcome.PasswordChanged -> {
+        showMessage(t("Password changed.", "Nenosiri limebadilishwa."))
+        null
+      }
+      is AuthOutcome.Failure -> if (r.error == AuthError.WRONG_CREDENTIALS)
+        t("Your current password is not correct.", "Nenosiri lako la sasa si sahihi.") else authErrorText(r.error)
+      else -> authErrorText(AuthError.NETWORK)
+    }
 
   /** Re-reads my profile from the server (approval status, role). */
   suspend fun refreshProfile(): Boolean = repository.auth.liveRefreshProfile()
@@ -241,6 +258,14 @@ class CampusViewModel(
     AuthError.TOO_MANY_ATTEMPTS -> t(
       "Too many tries. Ask for a new code.",
       "Majaribio mengi mno. Omba msimbo mpya."
+    )
+    AuthError.EMAIL_SEND_FAILED -> t(
+      "The server could not send the email. Please tell the app manager (email service is not set up for this address).",
+      "Seva imeshindwa kutuma barua pepe. Tafadhali mwambie msimamizi wa programu (huduma ya barua pepe haijawekwa kwa anwani hii)."
+    )
+    AuthError.RATE_LIMITED -> t(
+      "Too many emails were requested. Wait a few minutes and try again.",
+      "Barua pepe nyingi zimeombwa. Subiri dakika chache kisha ujaribu tena."
     )
   }
 
@@ -631,8 +656,11 @@ class CampusViewModel(
   // ---------- App manager ----------
 
   /** Creates the campus and its first administrator. Returns the reason in words when it failed, or null. */
-  fun createCampus(code: String, name: String, adminName: String, adminEmail: String, adminNumber: String, adminPassword: String): String? {
-    val result = repository.createCampus(code, name, adminName, adminEmail, adminNumber, adminPassword)
+  suspend fun createCampus(
+    code: String, name: String, adminName: String, adminEmail: String, adminNumber: String, adminPassword: String,
+    location: String = "", contactEmail: String = "", contactPhone: String = ""
+  ): String? {
+    val result = repository.createCampus(code, name, adminName, adminEmail, adminNumber, adminPassword, location, contactEmail, contactPhone)
     if (result.ok) {
       showMessage(t("Campus created.", "Chuo kimeundwa."))
       return null
@@ -643,13 +671,16 @@ class CampusViewModel(
   private fun platformErrorText(result: PlatformResult): String = when {
     result.authError != null -> authErrorText(result.authError)
     result.platformError == PlatformError.CAMPUS_EXISTS -> t("A campus with that short name already exists.", "Chuo chenye jina hilo fupi kipo tayari.")
-    result.platformError == PlatformError.DETAILS_MISSING -> t("Enter the campus short name and full name.", "Andika jina fupi na jina kamili la chuo.")
+    result.platformError == PlatformError.DETAILS_MISSING -> t("Enter a short name (letters and numbers, 2-20) and the full name.", "Andika jina fupi (herufi na namba, 2-20) na jina kamili la chuo.")
+    result.platformError == PlatformError.FAILED -> t("The server could not finish this. Check your connection, then try again.", "Seva imeshindwa kukamilisha. Angalia mtandao kisha ujaribu tena.")
     else -> t("Only the app manager can do this.", "Ni msimamizi wa programu pekee anayeweza kufanya hili.")
   }
 
   fun wipeCampus(universityId: String, scope: WipeScope) {
-    val ok = repository.wipeCampus(universityId, scope)
-    showMessage(if (ok) t("Deleted.", "Imefutwa.") else t("Could not delete.", "Imeshindikana kufuta."))
+    viewModelScope.launch {
+      val ok = repository.wipeCampus(universityId, scope)
+      showMessage(if (ok) t("Deleted.", "Imefutwa.") else t("Could not delete.", "Imeshindikana kufuta."))
+    }
   }
 
   /** Offline (maintenance) mode of the person's own campus: when true the whole campus is paused. */
@@ -657,18 +688,20 @@ class CampusViewModel(
   val myCampus = repository.myCampus
 
   fun setCampusMaintenance(universityId: String, on: Boolean, note: String) {
-    val ok = repository.setCampusMaintenance(universityId, on, note)
-    showMessage(
-      when {
-        !ok -> t("Could not change the campus mode.", "Imeshindikana kubadilisha hali ya chuo.")
-        on -> t("Campus is now offline for maintenance.", "Chuo kimewekwa nje ya mtandao kwa matengenezo.")
-        else -> t("Campus is back online.", "Chuo kimerudi mtandaoni.")
-      }
-    )
+    viewModelScope.launch {
+      val ok = repository.setCampusMaintenance(universityId, on, note)
+      showMessage(
+        when {
+          !ok -> t("Could not change the campus mode.", "Imeshindikana kubadilisha hali ya chuo.")
+          on -> t("Campus is now offline for maintenance.", "Chuo kimewekwa nje ya mtandao kwa matengenezo.")
+          else -> t("Campus is back online.", "Chuo kimerudi mtandaoni.")
+        }
+      )
+    }
   }
 
   /** Returns an error message, or null when the details were saved. */
-  fun updateCampusDetails(universityId: String, name: String?, location: String, email: String, phone: String): String? {
+  suspend fun updateCampusDetails(universityId: String, name: String?, location: String, email: String, phone: String): String? {
     val ok = repository.updateCampusDetails(universityId, name, location, email, phone)
     return if (ok) {
       showMessage(t("Campus details saved.", "Taarifa za chuo zimehifadhiwa."))
@@ -677,7 +710,7 @@ class CampusViewModel(
   }
 
   /** Returns an error message, or null when the person was added. */
-  fun addCampusUser(universityId: String, role: Role, name: String, email: String, number: String, programme: String?, password: String): String? {
+  suspend fun addCampusUser(universityId: String, role: Role, name: String, email: String, number: String, programme: String?, password: String): String? {
     val result = repository.addCampusUser(universityId, role, name, email, number, programme, password)
     if (result.ok) {
       showMessage(t("Person added. They can sign in now.", "Mtu ameongezwa. Anaweza kuingia sasa."))
@@ -687,8 +720,10 @@ class CampusViewModel(
   }
 
   fun deleteCampus(universityId: String) {
-    val ok = repository.deleteCampus(universityId)
-    showMessage(if (ok) t("Campus deleted.", "Chuo kimefutwa.") else t("Could not delete.", "Imeshindikana kufuta."))
+    viewModelScope.launch {
+      val ok = repository.deleteCampus(universityId)
+      showMessage(if (ok) t("Campus deleted.", "Chuo kimefutwa.") else t("Could not delete.", "Imeshindikana kufuta."))
+    }
   }
 
   // ---------- Registry ----------
@@ -696,11 +731,27 @@ class CampusViewModel(
   /** True/false against the university list, or null when that university has not uploaded one. */
 
   fun approveUser(userId: String, role: Role, programme: String?, teaches: Set<String>) {
-    repository.approveUser(userId, role, programme, teaches)
+    viewModelScope.launch {
+      val ok = repository.approveUser(userId, role, programme, teaches)
+      showMessage(if (ok) t("Account approved.", "Akaunti imeidhinishwa.") else t("Could not approve. Check your connection and that your email is verified.", "Imeshindikana kuidhinisha. Angalia mtandao na kuwa barua pepe imethibitishwa."))
+    }
   }
 
   fun rejectUser(userId: String) {
-    repository.rejectUser(userId)
+    viewModelScope.launch {
+      val ok = repository.rejectUser(userId)
+      showMessage(if (ok) t("Account rejected.", "Akaunti imekataliwa.") else t("Could not reject.", "Imeshindikana kukataa."))
+    }
+  }
+
+  /** Reloads the people waiting for approval (administrators) or the campus totals (app manager). */
+  fun refreshAdminData() {
+    viewModelScope.launch {
+      val u = repository.currentUser.value
+      if (u.status != com.willykez.campconnect.data.model.AccountStatus.APPROVED) return@launch
+      if (u.isPlatformAdmin) repository.refreshCampuses()
+      else if (u.role == Role.ADMIN) repository.refreshAccounts()
+    }
   }
 
   // ---------- My data ----------

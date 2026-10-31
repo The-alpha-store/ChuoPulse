@@ -189,6 +189,7 @@ fun ProfileScreen(
       }
     }
 
+    item { ChangePasswordCard(viewModel) }
     item {
       Text(
         text = "Preferences & Offline Sync",

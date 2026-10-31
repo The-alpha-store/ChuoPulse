@@ -147,6 +147,12 @@ class SupabaseClient(
     return request("DELETE", "$projectUrl/storage/v1/object/$bucket", body = JSONObject().put("prefixes", JSONArray(paths)), bearer = accessToken)
   }
 
+  /** Calls a database function (RPC). The function itself checks the caller's role; RLS and grants still apply. */
+  suspend fun rpc(function: String, args: JSONObject, accessToken: String): Result {
+    require(function.matches(Regex("[a-z_][a-z0-9_]{0,62}"))) { "Invalid function name" }
+    return request("POST", "$projectUrl/rest/v1/rpc/$function", body = args, bearer = accessToken)
+  }
+
   /** Calls a deployed Edge Function with the user's JWT. The function must independently authorize. */
   suspend fun invokeFunction(name: String, payload: JSONObject, accessToken: String): Result {
     require(name.matches(Regex("[a-z0-9-]{1,64}"))) { "Invalid function name" }

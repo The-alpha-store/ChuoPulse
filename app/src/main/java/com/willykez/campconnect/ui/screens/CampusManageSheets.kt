@@ -1,5 +1,6 @@
 package com.willykez.campconnect.ui.screens
 
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,8 @@ fun EditCampusDetailsSheet(viewModel: CampusViewModel, campus: University, canRe
   var email by remember { mutableStateOf(campus.contactEmail) }
   var phone by remember { mutableStateOf(campus.contactPhone) }
   var error by remember { mutableStateOf<String?>(null) }
+  var busy by remember { mutableStateOf(false) }
+  val scope = androidx.compose.runtime.rememberCoroutineScope()
 
   AppBottomSheet(
     onDismissRequest = onDismiss,
@@ -49,9 +52,14 @@ fun EditCampusDetailsSheet(viewModel: CampusViewModel, campus: University, canRe
     footer = {
       Button(
         onClick = {
-          error = viewModel.updateCampusDetails(campus.id, if (canRename) name else null, location, email, phone)
-          if (error == null) onDismiss()
+          scope.launch {
+            busy = true
+            error = viewModel.updateCampusDetails(campus.id, if (canRename) name else null, location, email, phone)
+            busy = false
+            if (error == null) onDismiss()
+          }
         },
+        enabled = !busy,
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
         modifier = Modifier.weight(1f).height(56.dp).testTag("campus_details_save")
@@ -85,6 +93,8 @@ fun AddCampusUserSheet(viewModel: CampusViewModel, universityId: String, allowAd
   var programme by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var error by remember { mutableStateOf<String?>(null) }
+  var busy by remember { mutableStateOf(false) }
+  val scope = androidx.compose.runtime.rememberCoroutineScope()
   val roles = if (allowAdmin) listOf(Role.STUDENT, Role.LECTURER, Role.ADMIN) else listOf(Role.STUDENT, Role.LECTURER)
   val programmes = remember(universityId) { viewModel.programmesFor(universityId) }
   val ready = name.isNotBlank() && email.isNotBlank() && number.isNotBlank() && password.isNotBlank() &&
@@ -98,10 +108,14 @@ fun AddCampusUserSheet(viewModel: CampusViewModel, universityId: String, allowAd
     footer = {
       Button(
         onClick = {
-          error = viewModel.addCampusUser(universityId, role, name, email, number, programme.ifBlank { null }, password)
-          if (error == null) onDismiss()
+          scope.launch {
+            busy = true
+            error = viewModel.addCampusUser(universityId, role, name, email, number, programme.ifBlank { null }, password)
+            busy = false
+            if (error == null) onDismiss()
+          }
         },
-        enabled = ready,
+        enabled = ready && !busy,
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
         modifier = Modifier.weight(1f).height(56.dp).testTag("add_user_btn")

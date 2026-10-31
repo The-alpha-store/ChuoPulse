@@ -75,7 +75,7 @@ enum class SessionError { NOT_ALLOWED, UNKNOWN_COURSE, LECTURER_NOT_FOR_COURSE, 
 /** A room and, if it is taken at the chosen time, by which course. */
 data class RoomOption(val name: String, val busyWith: String?)
 
-enum class PlatformError { NOT_ALLOWED, CAMPUS_EXISTS, DETAILS_MISSING }
+enum class PlatformError { NOT_ALLOWED, CAMPUS_EXISTS, DETAILS_MISSING, FAILED }
 enum class WipeScope { ANNOUNCEMENTS, TIMETABLE, MATERIALS, WORKS, NOTIFICATIONS, CATALOG, PEOPLE, EVERYTHING }
 
 data class PlatformResult(
@@ -1159,27 +1159,28 @@ class CampusRepository {
   // ---------- Registry: accounts ----------
 
 
-  fun approveUser(userId: String, role: Role, programme: String?, teaches: Set<String>) {
-    if (!canApproveOrDisapprove()) return
-    val before = pendingUsers.value.find { it.id == userId } ?: return // pendingUsers is already this campus only
-    val updated = auth.approve(userId, role, programme, teaches) ?: return
-
-    val roleLabel = role.name.lowercase().replaceFirstChar { it.uppercase() }
-    val placeText = if (role == Role.STUDENT) updated.programme ?: "" else "teaching ${teaches.sorted().joinToString(", ").ifBlank { "no courses yet" }}"
-    recordAudit("ACCOUNT_APPROVED", "Approved ${before.fullName} as $roleLabel ($placeText)")
-    if (role != before.role) {
-      recordAudit("ROLE_GRANTED", "Granted role $roleLabel to ${before.fullName}")
-    }
-    val first = before.fullName.substringBefore(' ')
-    notifyUsers(listOf(userId), "Karibu, $first. You are in.", "The Academic Registry approved your account.", NotificationType.APPROVAL)
+  /** Approves a waiting account on the server, then reloads the list. Returns true when it worked. */
+  suspend fun approveUser(userId: String, role: Role, programme: String?, teaches: Set<String>): Boolean {
+    if (!canApproveOrDisapprove()) return false
+    val before = pendingUsers.value.find { it.id == userId } ?: return false
+    val roleName = if (role == Role.LECTURER) "lecturer" else "student"
+    // Courses for a lecturer are assigned from the course catalogue once that is synced; the account is approved now.
+    val res = remote.approve(userId, roleName, auth.programmeUuid(before.universityId, programme ?: before.programme), emptyList())
+    if (!res.ok) return false
+    auth.loadAccounts()
+    return true
   }
 
-  fun rejectUser(userId: String) {
-    if (!canApproveOrDisapprove()) return
-    val user = pendingUsers.value.find { it.id == userId } ?: return
-    auth.reject(userId) ?: return
-    recordAudit("ACCOUNT_REJECTED", "Rejected account registration for ${user.fullName}")
+  suspend fun rejectUser(userId: String): Boolean {
+    if (!canApproveOrDisapprove()) return false
+    if (pendingUsers.value.none { it.id == userId }) return false
+    val res = remote.reject(userId)
+    if (res.ok) auth.loadAccounts()
+    return res.ok
   }
+
+  /** Reloads the accounts this administrator may see (their own campus). */
+  suspend fun refreshAccounts() { auth.loadAccounts() }
 
   // ---------- Campus setup (the campus administrator) ----------
 
@@ -1354,93 +1355,93 @@ class CampusRepository {
   private fun isAppManager(): Boolean = currentUser.value.let { it.isPlatformAdmin && isActive(it) }
 
   /** Totals per campus. Counts only: the manager never reads what a campus wrote. */
+  private val _remoteSummaries = MutableStateFlow<Map<String, RemoteCampusSummary>>(emptyMap())
+
+  private val remote = RemoteAdmin(token = { auth.accessToken }, refresh = { auth.refreshAccessToken() })
+
   val campuses: StateFlow<List<CampusSummary>> =
-    combine(catalog.universities, auth.accounts, _dataVersion) { universities, accounts, _ ->
+    combine(catalog.universities, _remoteSummaries, _dataVersion) { universities, remoteByCode, _ ->
       universities.map { u ->
-        val people = accounts.values.map { it.profile }.filter { it.universityId == u.id }
+        val r = remoteByCode[u.shortName]
         CampusSummary(
           university = u,
-          people = people.size,
-          pending = people.count { it.status == AccountStatus.PENDING },
-          admins = people.count { it.role == Role.ADMIN },
-          programmes = catalog.programmesFor(u.id).size,
-          courses = catalog.coursesFor(u.id).size,
-          rooms = catalog.roomsFor(u.id).size,
-          sessions = _sessions.value.count { universityOf(it.lecturerId) == u.id },
-          announcements = _announcements.value.count { universityOf(it.authorId) == u.id },
-          materials = _materials.value.count { universityOf(it.uploaderId) == u.id },
-          works = _deadlines.value.count { universityOf(it.lecturerId) == u.id } +
-            _submissions.value.count { universityOf(it.studentId) == u.id }
+          people = r?.people ?: 0, pending = r?.pending ?: 0, admins = r?.admins ?: 0,
+          programmes = r?.programmes ?: 0, courses = r?.courses ?: 0, rooms = r?.rooms ?: 0,
+          sessions = r?.sessions ?: 0, announcements = r?.announcements ?: 0,
+          materials = r?.materials ?: 0, works = r?.works ?: 0
         )
       }
     }.stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  /** Creates a campus and its first administrator in one step. */
-  fun createCampus(
+  suspend fun createCampus(
     code: String,
     name: String,
     adminName: String,
     adminEmail: String,
     adminNumber: String,
-    adminPassword: String
+    adminPassword: String,
+    location: String = "",
+    contactEmail: String = "",
+    contactPhone: String = ""
   ): PlatformResult {
     if (!isAppManager()) return PlatformResult(false, PlatformError.NOT_ALLOWED)
     val shortName = code.trim().uppercase()
-    val id = shortName.lowercase().replace(Regex("[^a-z0-9]"), "")
-    if (id.length < 2 || name.trim().length < 2) return PlatformResult(false, PlatformError.DETAILS_MISSING)
-    if (id == PlatformConfig.ID) return PlatformResult(false, PlatformError.CAMPUS_EXISTS)
-    if (!catalog.addUniversity(com.willykez.campconnect.data.model.University(id, name.trim(), shortName))) {
-      return PlatformResult(false, PlatformError.CAMPUS_EXISTS)
+    if (!Regex("[A-Z0-9_-]{2,20}").matches(shortName) || shortName == "PLATFORM" || name.trim().length < 2) {
+      return PlatformResult(false, PlatformError.DETAILS_MISSING)
     }
-    val error = auth.createApprovedAdmin(id, adminName, adminEmail, adminNumber, adminPassword)
-    if (error != null) {
-      catalog.removeUniversity(id) // nothing half-made is left behind
-      return PlatformResult(false, authError = error)
+    // Check the administrator's details first, so a bad email does not leave an empty campus behind.
+    val pre = auth.checkAdminDetails(adminName, adminEmail, adminNumber, adminPassword)
+    if (pre != null) return PlatformResult(false, authError = pre)
+
+    val made = remote.createUniversity(shortName, name.trim())
+    if (!made.ok) return PlatformResult(false, remoteToPlatform(made.error), remoteToAuth(made.error))
+    val admin = remote.provisionUser(shortName, "admin", adminName.trim(), adminEmail.trim().lowercase(), adminNumber.trim(), null, adminPassword)
+    if (!admin.ok) {
+      // Nothing half-made is left behind: remove the empty campus again.
+      remote.deleteUniversity(made.detail)
+      return PlatformResult(false, remoteToPlatform(admin.error), remoteToAuth(admin.error))
     }
-    _dataVersion.value++
-    recordAudit("CAMPUS_CREATED", "$shortName ${name.trim()} with administrator ${adminName.trim()}", PlatformConfig.ID)
+    if (location.isNotBlank() || contactEmail.isNotBlank() || contactPhone.isNotBlank()) {
+      remote.updateDetails(made.detail, name.trim(), location.trim(), contactEmail.trim(), contactPhone.trim())
+    }
+    auth.loadDirectory()
+    refreshCampuses()
     return PlatformResult(true)
   }
 
-  /** Deletes one kind of data (or all of it) from a campus. Irreversible. */
-  fun wipeCampus(universityId: String, scope: WipeScope): Boolean {
-    if (!isAppManager() || universityId == PlatformConfig.ID || !catalog.hasUniversity(universityId)) return false
-    fun mine(ownerId: String) = universityOf(ownerId) == universityId
-    val everything = scope == WipeScope.EVERYTHING
-    val peopleIds = auth.accounts.value.values.map { it.profile }.filter { it.universityId == universityId }.map { it.id }.toSet()
+  private fun remoteToPlatform(e: RemoteError?): PlatformError? = when (e) {
+    RemoteError.NOT_ALLOWED -> PlatformError.NOT_ALLOWED
+    RemoteError.CAMPUS_EXISTS -> PlatformError.CAMPUS_EXISTS
+    RemoteError.BAD_DETAILS -> PlatformError.DETAILS_MISSING
+    RemoteError.EMAIL_TAKEN, RemoteError.NUMBER_TAKEN, RemoteError.WEAK_PASSWORD, RemoteError.INVALID_NAME,
+    RemoteError.INVALID_EMAIL, RemoteError.INVALID_NUMBER -> null
+    else -> PlatformError.FAILED
+  }
 
-    if (everything || scope == WipeScope.ANNOUNCEMENTS) {
-      val ids = _announcements.value.filter { mine(it.authorId) }.map { it.id }.toSet()
-      _announcements.value = _announcements.value.filterNot { it.id in ids }
-      _readReceipts.value = _readReceipts.value - ids
-      _remindedAnnouncements.value = _remindedAnnouncements.value - ids
-    }
-    if (everything || scope == WipeScope.TIMETABLE) {
-      _sessions.value = _sessions.value.filterNot { mine(it.lecturerId) }
-    }
-    if (everything || scope == WipeScope.MATERIALS) {
-      val ids = _materials.value.filter { mine(it.uploaderId) }.map { it.id }.toSet()
-      _materials.value = _materials.value.filterNot { it.id in ids }
-      _downloads.value = _downloads.value.mapValues { (_, v) -> v - ids }
-    }
-    if (everything || scope == WipeScope.WORKS) {
-      val ids = _deadlines.value.filter { mine(it.lecturerId) }.map { it.id }.toSet()
-      _deadlines.value = _deadlines.value.filterNot { it.id in ids }
-      _submissions.value = _submissions.value.filterNot { mine(it.studentId) || it.deadlineId in ids }
-      _doneTicks.value = _doneTicks.value.mapValues { (_, v) -> v - ids }
-      val quizIds = _quizzes.value.filter { mine(it.lecturerId) }.map { it.id }.toSet()
-      _quizzes.value = _quizzes.value.filterNot { it.id in quizIds }
-      _attempts.value = _attempts.value.filterNot { it.quizId in quizIds || mine(it.studentId) }
-    }
-    if (everything || scope == WipeScope.NOTIFICATIONS || scope == WipeScope.PEOPLE) {
-      _notifications.value = _notifications.value.filterNot { it.userId in peopleIds }
-    }
-    if (everything || scope == WipeScope.CATALOG) catalog.clearCampus(universityId)
-    if (everything || scope == WipeScope.PEOPLE) auth.removeAccountsOf(universityId, includeAdmins = everything)
+  private fun remoteToAuth(e: RemoteError?): com.willykez.campconnect.data.auth.AuthError? = when (e) {
+    RemoteError.EMAIL_TAKEN -> com.willykez.campconnect.data.auth.AuthError.EMAIL_TAKEN
+    RemoteError.NUMBER_TAKEN -> com.willykez.campconnect.data.auth.AuthError.NUMBER_TAKEN
+    RemoteError.WEAK_PASSWORD -> com.willykez.campconnect.data.auth.AuthError.PASSWORD_WEAK
+    RemoteError.INVALID_NAME -> com.willykez.campconnect.data.auth.AuthError.NAME_REQUIRED
+    RemoteError.INVALID_EMAIL -> com.willykez.campconnect.data.auth.AuthError.EMAIL_INVALID
+    RemoteError.INVALID_NUMBER -> com.willykez.campconnect.data.auth.AuthError.NUMBER_INVALID
+    else -> null
+  }
 
+  /** Reads the campus totals from the server (app manager only). */
+  suspend fun refreshCampuses() {
+    if (!isAppManager()) return
+    val list = remote.campusSummaries() ?: return
+    _remoteSummaries.value = list.associateBy { it.code }
     _dataVersion.value++
-    recordAudit("CAMPUS_DATA_DELETED", "${catalog.universityName(universityId)}: ${scope.name}", PlatformConfig.ID)
-    return true
+  }
+
+  suspend fun wipeCampus(universityId: String, scope: WipeScope): Boolean {
+    if (!isAppManager() || universityId == PlatformConfig.ID) return false
+    val uuid = auth.universityUuid(universityId) ?: return false
+    val res = remote.wipeCampus(uuid, scope.name.lowercase())
+    refreshCampuses()
+    return res.ok
   }
 
   // ---------- Campus details, offline mode and adding people ----------
@@ -1459,22 +1460,15 @@ class CampusRepository {
     .map { it?.underMaintenance == true }
     .stateIn(scope, SharingStarted.Eagerly, false)
 
-  /** The app manager puts a campus offline for maintenance, or brings it back. */
-  fun setCampusMaintenance(universityId: String, on: Boolean, note: String): Boolean {
+  suspend fun setCampusMaintenance(universityId: String, on: Boolean, note: String): Boolean {
     if (!isAppManager() || universityId == PlatformConfig.ID) return false
-    val ok = catalog.updateUniversity(universityId) { it.copy(underMaintenance = on, maintenanceNote = if (on) note.trim() else "") }
-    if (ok) {
-      _dataVersion.value++
-      recordAudit(if (on) "CAMPUS_OFFLINE" else "CAMPUS_ONLINE", catalog.universityName(universityId), PlatformConfig.ID)
-    }
-    return ok
+    val uuid = auth.universityUuid(universityId) ?: return false
+    val res = remote.setMaintenance(uuid, on, note.trim())
+    if (res.ok) { auth.loadDirectory(); _dataVersion.value++ }
+    return res.ok
   }
 
-  /**
-   * Edits a campus's details. The app manager may edit any campus (including its name); a campus
-   * administrator may edit only their own campus's contact details.
-   */
-  fun updateCampusDetails(
+  suspend fun updateCampusDetails(
     universityId: String,
     name: String?,
     location: String,
@@ -1486,26 +1480,13 @@ class CampusRepository {
     val ownAdmin = isActive(me) && me.role == Role.ADMIN && !me.isPlatformAdmin && me.universityId == universityId
     if (!manager && !ownAdmin) return false
     if (name != null && manager && name.trim().length < 2) return false
-    val ok = catalog.updateUniversity(universityId) {
-      it.copy(
-        name = if (manager && name != null) name.trim() else it.name,
-        location = location.trim(),
-        contactEmail = contactEmail.trim(),
-        contactPhone = contactPhone.trim()
-      )
-    }
-    if (ok) {
-      _dataVersion.value++
-      recordAudit("CAMPUS_DETAILS_EDITED", catalog.universityName(universityId), me.id)
-    }
-    return ok
+    val uuid = auth.universityUuid(universityId) ?: return false
+    val res = remote.updateDetails(uuid, if (manager) name else null, location.trim(), contactEmail.trim(), contactPhone.trim())
+    if (res.ok) { auth.loadDirectory(); _dataVersion.value++ }
+    return res.ok
   }
 
-  /**
-   * Adds an approved person to a campus without the sign-up queue. The app manager can add to any
-   * campus; a campus administrator only to their own.
-   */
-  fun addCampusUser(
+  suspend fun addCampusUser(
     universityId: String,
     role: Role,
     fullName: String,
@@ -1518,23 +1499,25 @@ class CampusRepository {
     val manager = isAppManager()
     val ownAdmin = isActive(me) && me.role == Role.ADMIN && !me.isPlatformAdmin && me.universityId == universityId
     if (!manager && !ownAdmin) return PlatformResult(false, PlatformError.NOT_ALLOWED)
-    if (!catalog.hasUniversity(universityId)) return PlatformResult(false, PlatformError.DETAILS_MISSING)
-    val error = auth.createApprovedUser(universityId, role, fullName, email, idNumber, programme, password)
-    if (error != null) return PlatformResult(false, authError = error)
-    _dataVersion.value++
-    recordAudit("USER_ADDED", "${fullName.trim()} (${role.name.lowercase()}) at ${catalog.universityName(universityId)}", me.id)
+    val code = catalog.university(universityId)?.shortName ?: return PlatformResult(false, PlatformError.DETAILS_MISSING)
+    if (role == Role.STUDENT && programme.isNullOrBlank()) {
+      return PlatformResult(false, authError = com.willykez.campconnect.data.auth.AuthError.PROGRAMME_REQUIRED)
+    }
+    val pre = auth.checkAdminDetails(fullName, email, idNumber, password)
+    if (pre != null) return PlatformResult(false, authError = pre)
+    val res = remote.provisionUser(code, role.name.lowercase(), fullName.trim(), email.trim().lowercase(), idNumber.trim(), programme, password)
+    if (!res.ok) return PlatformResult(false, remoteToPlatform(res.error), remoteToAuth(res.error))
+    if (ownAdmin) auth.loadAccounts() else refreshCampuses()
     return PlatformResult(true)
   }
 
-  /** Removes a campus entirely: its data, its people and its place in the sign-up list. */
-  fun deleteCampus(universityId: String): Boolean {
-    if (!isAppManager() || universityId == PlatformConfig.ID || !catalog.hasUniversity(universityId)) return false
-    val name = catalog.universityName(universityId)
-    wipeCampus(universityId, WipeScope.EVERYTHING)
-    catalog.removeUniversity(universityId)
-    _dataVersion.value++
-    recordAudit("CAMPUS_DELETED", name, PlatformConfig.ID)
-    return true
+  suspend fun deleteCampus(universityId: String): Boolean {
+    if (!isAppManager() || universityId == PlatformConfig.ID) return false
+    val uuid = auth.universityUuid(universityId) ?: return false
+    remote.wipeCampus(uuid, "everything") // removes the stored files too
+    val res = remote.deleteUniversity(uuid)
+    if (res.ok) { auth.loadDirectory(); refreshCampuses() }
+    return res.ok
   }
 
   // ---------- My data ----------

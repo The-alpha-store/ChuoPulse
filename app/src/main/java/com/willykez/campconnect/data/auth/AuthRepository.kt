@@ -44,6 +44,10 @@ enum class AuthError {
   CODE_WRONG,
   CODE_EXPIRED,
   TOO_MANY_ATTEMPTS,
+  /** The server accepted the request but could not send the email (email service not set up, or recipient not allowed). */
+  EMAIL_SEND_FAILED,
+  /** Too many emails requested in a short time. */
+  RATE_LIMITED,
   /** The server could not be reached, or it failed. Nothing was changed. */
   NETWORK
 }
@@ -205,6 +209,85 @@ class AuthRepository(
     }
   }
 
+  /**
+   * The signed-in person changes their own password (for example after an administrator gave them a
+   * starting one). The current password is checked first, so a borrowed unlocked phone cannot change it.
+   */
+  suspend fun changePassword(currentPassword: String, newPassword: String): AuthOutcome {
+    val id = _session.value?.userId ?: return AuthOutcome.Failure(AuthError.WRONG_CREDENTIALS)
+    val email = _accounts.value[id]?.profile?.email ?: return AuthOutcome.Failure(AuthError.WRONG_CREDENTIALS)
+    if (!checkPassword(newPassword, email).acceptable) return AuthOutcome.Failure(AuthError.PASSWORD_WEAK)
+    var access = liveAccess ?: return AuthOutcome.Failure(AuthError.WRONG_CREDENTIALS)
+    val check = try { Backend.client.signIn(email, currentPassword) } catch (e: Exception) { return AuthOutcome.Failure(AuthError.NETWORK) }
+    if (!check.isSuccessful) return AuthOutcome.Failure(if (check.code >= 500) AuthError.NETWORK else AuthError.WRONG_CREDENTIALS)
+    safeJson(check).optString("access_token").takeIf { it.isNotBlank() }?.let { runCatching { Backend.client.signOut(it) } }
+    var u = try { Backend.client.updatePassword(access, newPassword) } catch (e: Exception) { return AuthOutcome.Failure(AuthError.NETWORK) }
+    if (u.code == 401) {
+      access = refreshAccessToken() ?: return AuthOutcome.Failure(AuthError.CODE_EXPIRED)
+      u = try { Backend.client.updatePassword(access, newPassword) } catch (e: Exception) { return AuthOutcome.Failure(AuthError.NETWORK) }
+    }
+    return if (u.isSuccessful) AuthOutcome.PasswordChanged else AuthOutcome.Failure(AuthError.PASSWORD_WEAK)
+  }
+
+  /** Checks the details typed for a person an administrator is adding. Null when they are fine. */
+  fun checkAdminDetails(fullName: String, email: String, idNumber: String, password: String): AuthError? {
+    val cleanEmail = normalizeEmail(email)
+    return when {
+      fullName.trim().length < 3 -> AuthError.NAME_REQUIRED
+      !EMAIL_REGEX.matches(cleanEmail) -> AuthError.EMAIL_INVALID
+      idNumber.trim().length < 2 -> AuthError.NUMBER_INVALID
+      !checkPassword(password, cleanEmail).acceptable -> AuthError.PASSWORD_WEAK
+      else -> null
+    }
+  }
+
+  /** Gets a new access token with the refresh token (the old one lasts about an hour). Null if that fails. */
+  suspend fun refreshAccessToken(): String? {
+    val refresh = liveRefresh ?: return null
+    val rr = runCatching { Backend.client.refresh(refresh) }.getOrNull() ?: return null
+    if (!rr.isSuccessful) return null
+    val j = safeJson(rr)
+    val access = j.optString("access_token").ifBlank { return null }
+    liveAccess = access
+    liveRefresh = j.text("refresh_token") ?: refresh
+    return access
+  }
+
+  /** The database id of a campus, from the id the app uses (its lower-case code). */
+  fun universityUuid(appId: String): String? = uniAppIdByUuid.entries.firstOrNull { it.value == appId }?.key
+
+  /** The database id of a programme by name, within one campus. */
+  fun programmeUuid(universityAppId: String, name: String?): String? {
+    if (name.isNullOrBlank()) return null
+    return programmeNameById.entries.firstOrNull { it.value.equals(name.trim(), ignoreCase = true) }?.key
+  }
+
+  /**
+   * Loads the accounts the signed-in administrator is allowed to see (row-level security limits this to
+   * their own campus) so the approvals list shows real people. A student or lecturer only sees themselves.
+   */
+  suspend fun loadAccounts(): Boolean {
+    val access = liveAccess ?: return false
+    return try {
+      if (uniAppIdByUuid.isEmpty()) loadDirectory()
+      val r = Backend.client.select("profiles", "select=*&order=created_at.desc&limit=500", access)
+      if (!r.isSuccessful) return false
+      val rows = r.jsonArray()
+      val me = _session.value?.userId
+      val loaded = mutableMapOf<String, Account>()
+      for (i in 0 until rows.length()) {
+        val o = rows.getJSONObject(i)
+        val p = profileFrom(o)
+        if (p.id == me) continue // my own record is kept by the sign-in
+        loaded[p.id] = Account(p, "live", "", emailVerified = o.optBoolean("email_verified"))
+      }
+      _accounts.value = _accounts.value.filterKeys { it == me } + loaded
+      true
+    } catch (e: Exception) {
+      false
+    }
+  }
+
   private fun profileFrom(row: JSONObject): UserProfile {
     val platform = row.optBoolean("is_platform_admin")
     val uni = if (platform) PlatformConfig.ID else uniAppIdByUuid[row.optString("university_id")] ?: row.optString("university_id")
@@ -282,10 +365,13 @@ class AuthRepository(
     val r = try { Backend.client.signUp(cleanEmail, password, meta) } catch (e: Exception) { return AuthOutcome.Failure(AuthError.NETWORK) }
     if (r.isSuccessful) return AuthOutcome.NeedCode(CodePurpose.VERIFY_EMAIL, cleanEmail)
     val code = safeJson(r).optString("error_code")
+    val msg = safeJson(r).let { it.optString("msg").ifBlank { it.optString("message") } }.lowercase()
     return AuthOutcome.Failure(
       when {
         code == "user_already_exists" || code == "email_exists" -> AuthError.EMAIL_TAKEN
         code == "weak_password" -> AuthError.PASSWORD_WEAK
+        code == "over_email_send_rate_limit" || r.code == 429 -> AuthError.RATE_LIMITED
+        code == "email_address_not_authorized" || msg.contains("sending") || msg.contains("smtp") -> AuthError.EMAIL_SEND_FAILED
         // The database refuses a sign-up with a generic "Database error saving new user": the usual
         // cause is a registration or staff number already used at that campus.
         r.code == 500 -> AuthError.NUMBER_TAKEN
@@ -311,8 +397,23 @@ class AuthRepository(
   }
 
   suspend fun liveRequestReset(email: String): AuthOutcome {
-    runCatching { Backend.client.recover(normalizeEmail(email)) }
-    return AuthOutcome.NeedCode(CodePurpose.RESET_PASSWORD, normalizeEmail(email))
+    val clean = normalizeEmail(email)
+    val r = try { Backend.client.recover(clean) } catch (e: Exception) { return AuthOutcome.Failure(AuthError.NETWORK) }
+    if (!r.isSuccessful) {
+      // An unknown email still answers 200 (no account enumeration), so a failure here is a real
+      // delivery problem and the person must be told instead of waiting for a code that never comes.
+      val j = safeJson(r)
+      val c = j.optString("error_code")
+      val msg = j.optString("msg").ifBlank { j.optString("message") }.lowercase()
+      return AuthOutcome.Failure(
+        when {
+          r.code == 429 || c == "over_email_send_rate_limit" -> AuthError.RATE_LIMITED
+          c == "email_address_not_authorized" || r.code >= 500 || msg.contains("sending") -> AuthError.EMAIL_SEND_FAILED
+          else -> AuthError.NETWORK
+        }
+      )
+    }
+    return AuthOutcome.NeedCode(CodePurpose.RESET_PASSWORD, clean)
   }
 
   suspend fun liveResetPassword(email: String, code: String, newPassword: String): AuthOutcome {

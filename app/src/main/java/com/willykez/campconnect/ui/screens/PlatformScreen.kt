@@ -1,5 +1,6 @@
 package com.willykez.campconnect.ui.screens
 
+import kotlinx.coroutines.launch
 import com.willykez.campconnect.ui.components.SoftIconButton
 import com.willykez.campconnect.ui.components.ActionButton
 import androidx.compose.foundation.border
@@ -96,6 +97,7 @@ import com.willykez.campconnect.viewmodel.CampusViewModel
 @Composable
 fun PlatformScreen(viewModel: CampusViewModel) {
   val campuses by viewModel.campuses.collectAsState()
+  LaunchedEffect(Unit) { viewModel.refreshAdminData() }
   val logs by viewModel.auditLogs.collectAsState()
   val message by viewModel.message.collectAsState()
   val user by viewModel.currentUser.collectAsState()
@@ -375,7 +377,12 @@ private fun CreateCampusSheet(viewModel: CampusViewModel, onDismiss: () -> Unit)
   var adminEmail by remember { mutableStateOf("") }
   var adminNumber by remember { mutableStateOf("") }
   var adminPassword by remember { mutableStateOf("") }
+  var location by remember { mutableStateOf("") }
+  var contactEmail by remember { mutableStateOf("") }
+  var contactPhone by remember { mutableStateOf("") }
   var error by remember { mutableStateOf<String?>(null) }
+  var busy by remember { mutableStateOf(false) }
+  val scope = androidx.compose.runtime.rememberCoroutineScope()
 
   AppBottomSheet(
     onDismissRequest = onDismiss,
@@ -387,20 +394,30 @@ private fun CreateCampusSheet(viewModel: CampusViewModel, onDismiss: () -> Unit)
     footer = {
       Button(
         onClick = {
-          error = viewModel.createCampus(code, name, adminName, adminEmail, adminNumber, adminPassword)
-          if (error == null) onDismiss()
+          scope.launch {
+            busy = true
+            error = viewModel.createCampus(code, name, adminName, adminEmail, adminNumber, adminPassword, location, contactEmail, contactPhone)
+            busy = false
+            if (error == null) onDismiss()
+          }
         },
-        enabled = listOf(code, name, adminName, adminEmail, adminNumber, adminPassword).all { it.isNotBlank() },
+        enabled = !busy && listOf(code, name, adminName, adminEmail, adminNumber, adminPassword).all { it.isNotBlank() },
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
         modifier = Modifier.weight(1f).height(52.dp).testTag("campus_create_btn")
-      ) { Text(viewModel.t("Create campus", "Unda chuo"), fontWeight = FontWeight.SemiBold) }
+      ) { Text(if (busy) viewModel.t("Creating...", "Inaunda...") else viewModel.t("Create campus", "Unda chuo"), fontWeight = FontWeight.SemiBold) }
     }
   ) {
     Spacer(modifier = Modifier.height(8.dp))
     SheetField(code, { code = it; error = null }, viewModel.t("Short name (for example UDOM)", "Jina fupi (mfano UDOM)"), "campus_code")
     Spacer(modifier = Modifier.height(10.dp))
     SheetField(name, { name = it; error = null }, viewModel.t("Full name of the university", "Jina kamili la chuo"), "campus_name")
+    Spacer(modifier = Modifier.height(10.dp))
+    SheetField(location, { location = it }, viewModel.t("Location (optional)", "Mahali (si lazima)"), "campus_location")
+    Spacer(modifier = Modifier.height(10.dp))
+    SheetField(contactEmail, { contactEmail = it }, viewModel.t("Contact email (optional)", "Barua pepe ya mawasiliano (si lazima)"), "campus_contact_email")
+    Spacer(modifier = Modifier.height(10.dp))
+    SheetField(contactPhone, { contactPhone = it }, viewModel.t("Contact phone (optional)", "Simu ya mawasiliano (si lazima)"), "campus_contact_phone")
     Spacer(modifier = Modifier.height(18.dp))
     Text(viewModel.t("First administrator", "Msimamizi wa kwanza"), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(8.dp))

@@ -529,19 +529,19 @@ private fun CodePage(
     if (purpose == CodePurpose.SECOND_STEP) viewModel.t("Second step", "Hatua ya pili")
     else viewModel.t("Check your email", "Angalia barua pepe yako"),
     viewModel.t(
-      "We sent a six-digit code to $email.",
-      "Tumetuma msimbo wa tarakimu sita kwa $email."
+      "We sent a code to $email. Enter it below.",
+      "Tumetuma msimbo kwa $email. Uingize hapa chini."
     )
   )
   CodeField(
     value = code,
-    onChange = { code = it.filter(Char::isDigit).take(6) },
+    onChange = { code = it.filter(Char::isDigit).take(8) },
     tag = "auth_code",
-    onDone = { if (code.length == 6) onSubmit(code) }
+    onDone = { if (code.length >= 6) onSubmit(code) }
   )
   ErrorLine(error)
   Spacer(modifier = Modifier.height(16.dp))
-  PrimaryAction(viewModel.t("Continue", "Endelea"), code.length == 6, "auth_code_btn") { onSubmit(code) }
+  PrimaryAction(viewModel.t("Continue", "Endelea"), code.length >= 6, "auth_code_btn") { onSubmit(code) }
   Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
     TextButton(onClick = onResend) { Text(viewModel.t("Send a new code", "Tuma msimbo mpya")) }
   }
@@ -582,11 +582,11 @@ private fun ResetPage(
   PageTitle(
     viewModel.t("Choose a new password", "Chagua nenosiri jipya"),
     viewModel.t(
-      "If $email has an account, a six-digit code was sent to it.",
-      "Ikiwa $email ina akaunti, msimbo wa tarakimu sita umetumwa."
+      "If $email has an account, a code was sent to it.",
+      "Ikiwa $email ina akaunti, msimbo umetumwa."
     )
   )
-  CodeField(value = code, onChange = { code = it.filter(Char::isDigit).take(6) }, tag = "auth_reset_code", onDone = null)
+  CodeField(value = code, onChange = { code = it.filter(Char::isDigit).take(8) }, tag = "auth_reset_code", onDone = null)
   Spacer(modifier = Modifier.height(12.dp))
   AuthField(
     password, { password = it }, viewModel.t("New password", "Nenosiri jipya"), "auth_reset_password",
@@ -595,7 +595,7 @@ private fun ResetPage(
   PasswordHint(viewModel, password, email)
   Spacer(modifier = Modifier.height(10.dp))
 
-  val canSubmit = code.length == 6 && password.isNotEmpty()
+  val canSubmit = code.length >= 6 && password.isNotEmpty()
   val submit = {
     if (password != confirm) {
       onError(viewModel.t("The two passwords are not the same.", "Manenosiri mawili hayafanani."))
