@@ -68,14 +68,16 @@ jobs:
           # Cache is scoped per matrix entry so each app gets its own cache slot
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      - name: Check Supabase secrets are set
+      - name: Check or fallback Supabase secrets
         run: |
-          for name in SUPABASE_URL SUPABASE_ANON_KEY; do
-            if [ -z "${!name}" ]; then
-              echo "::error::Repository secret $name is missing (Settings > Secrets and variables > Actions)"
-              exit 1
-            fi
-          done
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::warning::Repository secret SUPABASE_URL is not set (Settings > Secrets and variables > Actions). Using placeholder for build."
+            echo "SUPABASE_URL=https://placeholder.supabase.co" >> "$GITHUB_ENV"
+          fi
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::warning::Repository secret SUPABASE_ANON_KEY is not set (Settings > Secrets and variables > Actions). Using placeholder for build."
+            echo "SUPABASE_ANON_KEY=placeholder-anon-key" >> "$GITHUB_ENV"
+          fi
 
       - name: Create temporary signing key
         run: |
@@ -168,9 +170,9 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          for name in KEYSTORE_BASE64 STORE_PASSWORD KEY_PASSWORD KEY_ALIAS; do
+          for name in KEYSTORE_BASE64 STORE_PASSWORD KEY_PASSWORD KEY_ALIAS SUPABASE_URL SUPABASE_ANON_KEY; do
             if [ -z "${!name}" ]; then
-              echo "::error::Repository secret $name is missing"
+              echo "::error::Repository secret $name is missing (Settings > Secrets and variables > Actions)"
               exit 1
             fi
           done
