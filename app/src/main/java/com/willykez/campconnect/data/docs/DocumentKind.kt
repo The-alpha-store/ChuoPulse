@@ -1,0 +1,62 @@
+package com.willykez.campconnect.data.docs
+
+enum class DocumentKind(val label: String) {
+  PDF("PDF"),
+  IMAGE("Image"),
+  WORD("Word document"),
+  SLIDES("Presentation"),
+  SHEET("Spreadsheet"),
+  TEXT("Text file"),
+  ARCHIVE("Archive"),
+  OTHER("File");
+
+  companion object {
+    val pickerMimeTypes: Array<String> = arrayOf(
+      "application/pdf",
+      "image/*",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+      "application/vnd.oasis.opendocument.text",
+      "application/vnd.oasis.opendocument.presentation",
+      "application/vnd.oasis.opendocument.spreadsheet",
+      "application/rtf",
+      "application/zip",
+      "application/x-zip-compressed",
+      "text/*"
+    )
+
+    val legacyOffice = setOf("doc", "ppt", "xls")
+
+    fun extensionOf(fileName: String): String = fileName.substringAfterLast('.', "").lowercase()
+
+    fun of(fileName: String, mimeType: String? = null): DocumentKind {
+      when (extensionOf(fileName)) {
+        "pdf" -> return PDF
+        "jpg", "jpeg", "png", "webp", "gif", "bmp", "heic", "heif", "jfif" -> return IMAGE
+        "zip", "rar", "7z", "tar", "gz" -> return ARCHIVE
+        "docx", "doc", "odt", "rtf" -> return WORD
+        "pptx", "ppt", "odp" -> return SLIDES
+        "xlsx", "xls", "ods", "csv", "tsv" -> return SHEET
+        "txt", "md", "html", "htm", "json", "xml", "log" -> return TEXT
+      }
+      val m = mimeType.orEmpty().lowercase()
+      return when {
+        m == "application/pdf" -> PDF
+        m.startsWith("image/") -> IMAGE
+        "wordprocessing" in m || "msword" in m || "opendocument.text" in m || m == "application/rtf" -> WORD
+        "presentation" in m || "powerpoint" in m -> SLIDES
+        "spreadsheet" in m || "excel" in m -> SHEET
+        m.startsWith("text/") -> TEXT
+        "zip" in m || "compressed" in m -> ARCHIVE
+        else -> OTHER
+      }
+    }
+
+    fun isAnalysable(fileName: String, mimeType: String? = null): Boolean =
+      of(fileName, mimeType).let { it != OTHER && it != ARCHIVE }
+  }
+}
