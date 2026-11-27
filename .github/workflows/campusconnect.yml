@@ -87,12 +87,42 @@ jobs:
           for a in $apps; do tasks="$tasks :app-$a:$task"; done
           gradle --no-daemon $tasks --stacktrace
 
-      - name: Upload APK
+      - name: Check an APK was built
+        env:
+          VARIANT: ${{ inputs.variant || 'staging' }}
+        run: |
+          ls -l app-*/build/outputs/apk/$VARIANT/*.apk || { echo "::error::No APK was produced"; exit 1; }
+
+      - name: Upload owner APK
         uses: actions/upload-artifact@v4
         with:
-          name: chuopulse-${{ inputs.variant || 'staging' }}-apks
-          path: app-*/build/outputs/apk/${{ inputs.variant || 'staging' }}/*.apk
-          if-no-files-found: error
+          name: chuopulse-owner-${{ inputs.variant || 'staging' }}
+          path: app-owner/build/outputs/apk/${{ inputs.variant || 'staging' }}/*.apk
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload admin APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: chuopulse-admin-${{ inputs.variant || 'staging' }}
+          path: app-admin/build/outputs/apk/${{ inputs.variant || 'staging' }}/*.apk
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload lecturer APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: chuopulse-lecturer-${{ inputs.variant || 'staging' }}
+          path: app-lecturer/build/outputs/apk/${{ inputs.variant || 'staging' }}/*.apk
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload student APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: chuopulse-student-${{ inputs.variant || 'staging' }}
+          path: app-student/build/outputs/apk/${{ inputs.variant || 'staging' }}/*.apk
+          if-no-files-found: ignore
           retention-days: 14
 
       - name: Upload mapping file
