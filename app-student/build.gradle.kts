@@ -3,24 +3,6 @@ plugins {
   alias(libs.plugins.kotlin.compose)
 }
 
-kotlin {
-  compilerOptions {
-    freeCompilerArgs.add("-opt-in=androidx.compose.material3.ExperimentalMaterial3Api")
-  }
-}
-
-val dotEnv: Map<String, String> = rootProject.file(".env").takeIf { it.exists() }
-  ?.readLines()
-  ?.map { it.trim() }
-  ?.filter { it.isNotEmpty() && !it.startsWith("#") && it.contains("=") }
-  ?.associate { it.substringBefore("=").trim() to it.substringAfter("=").trim().trim('"', '\'') }
-  ?: emptyMap()
-
-fun setting(name: String, default: String = ""): String =
-  providers.gradleProperty(name).orElse(providers.environmentVariable(name)).orNull
-    ?: dotEnv[name]
-    ?: default
-
 android {
   namespace = "com.willykez.campconnect.student"
   compileSdk = 36
@@ -65,32 +47,26 @@ android {
       isCrunchPngs = true
       isMinifyEnabled = true
       isShrinkResources = true
+
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"
       )
+
       if (signingConfigs.findByName("release") != null) {
         signingConfig = signingConfigs.getByName("release")
       }
     }
+
     debug {
       signingConfig = signingConfigs.getByName("debugConfig")
     }
+
     create("staging") {
       initWith(getByName("release"))
       signingConfig = signingConfigs.getByName("debugConfig")
       matchingFallbacks += listOf("release")
     }
-  }
-
-  compileOptions {
-    isCoreLibraryDesugaringEnabled = true
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-  }
-
-  buildFeatures {
-    compose = true
   }
 
   packaging {
@@ -103,18 +79,31 @@ android {
     }
   }
 
+  compileOptions {
+    isCoreLibraryDesugaringEnabled = true
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+  }
+
+  lint {
+    abortOnError = false
+  }
+
+  buildFeatures {
+    compose = true
+  }
+
   dependenciesInfo {
     includeInApk = false
     includeInBundle = false
   }
-
-  lint { abortOnError = false }
 }
 
 dependencies {
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
   implementation(project(":core"))
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.activity.compose)
-  implementation(libs.androidx.lifecycle.viewmodel.compose)
+  implementation(libs.androidx.compose.ui)
 }

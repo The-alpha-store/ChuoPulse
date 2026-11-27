@@ -24,10 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "CampusConnect"
 
-include(":app")
-include(":core")
-include(":app-owner")
-include(":app-admin")
-include(":app-lecturer")
-include(":app-student")
-
+include(":core", ":app-owner", ":app-admin", ":app-lecturer", ":app-student")

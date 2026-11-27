@@ -23,12 +23,12 @@ fun setting(name: String, default: String = ""): String =
     ?: default
 
 android {
-  // Same namespace as :app so SupabaseClient's `import com.willykez.campconnect.BuildConfig` resolves.
   namespace = "com.willykez.campconnect"
   compileSdk = 36
 
   defaultConfig {
     minSdk = 24
+    consumerProguardFiles("consumer-rules.pro")
 
     val supabaseUrl = setting("SUPABASE_URL")
     val supabaseAnonKey = setting("SUPABASE_ANON_KEY")
@@ -38,6 +38,7 @@ android {
       "SUPABASE_URL",
       "\"${supabaseUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\""
     )
+
     buildConfigField(
       "String",
       "SUPABASE_ANON_KEY",
@@ -51,23 +52,13 @@ android {
     targetCompatibility = JavaVersion.VERSION_11
   }
 
+  lint {
+    abortOnError = false
+  }
+
   buildFeatures {
     compose = true
     buildConfig = true
-  }
-
-  packaging {
-    resources {
-      excludes += "/META-INF/{AL2.0,LGPL2.1}"
-      excludes += "META-INF/DEPENDENCIES"
-      excludes += "META-INF/LICENSE*"
-      excludes += "META-INF/NOTICE*"
-      excludes += "META-INF/*.kotlin_module"
-    }
-  }
-
-  lint {
-    abortOnError = false
   }
 }
 
@@ -92,3 +83,34 @@ dependencies {
 
   "ksp"(libs.androidx.room.compiler)
 }
+
+val liveUrlProvider = providers.gradleProperty("SUPABASE_URL")
+  .orElse(providers.environmentVariable("SUPABASE_URL"))
+  .orElse(provider { dotEnv["SUPABASE_URL"] ?: "" })
+
+val liveKeyProvider = providers.gradleProperty("SUPABASE_ANON_KEY")
+  .orElse(providers.environmentVariable("SUPABASE_ANON_KEY"))
+  .orElse(provider { dotEnv["SUPABASE_ANON_KEY"] ?: "" })
+
+tasks.register("verifyLiveConfig") {
+  val urlProvider = liveUrlProvider
+  val keyProvider = liveKeyProvider
+  inputs.property("supabaseUrl", urlProvider)
+  inputs.property("supabaseAnonKey", keyProvider)
+
+  doLast {
+    val url = urlProvider.get()
+    val key = keyProvider.get()
+    val isInvalidUrl = url.isBlank() || url.contains("YOUR_", ignoreCase = true)
+    val isInvalidKey = key.isBlank() || key.contains("YOUR_", ignoreCase = true)
+
+    if (isInvalidUrl || isInvalidKey) {
+      throw GradleException(
+        "SUPABASE_URL and SUPABASE_ANON_KEY are missing or still placeholders. " +
+          "Set them in .env, or as GitHub repository secrets, before building a release. See README.md."
+      )
+    }
+  }
+}
+
+tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn("verifyLiveConfig") }

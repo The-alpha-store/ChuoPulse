@@ -18,7 +18,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -90,6 +89,7 @@ import androidx.compose.ui.unit.sp
 import com.willykez.campconnect.data.auth.AuthOutcome
 import com.willykez.campconnect.data.auth.CodePurpose
 import com.willykez.campconnect.data.auth.PasswordStrength
+import com.willykez.campconnect.data.supabase.Backend
 import com.willykez.campconnect.data.model.AccountStatus
 import com.willykez.campconnect.data.model.AppLanguage
 import com.willykez.campconnect.ui.components.PickerField
@@ -211,7 +211,7 @@ fun AuthGate(viewModel: CampusViewModel) {
       )
       Spacer(modifier = Modifier.height(12.dp))
     }
-    if (page == AuthPage.SIGN_IN || page == AuthPage.SIGN_UP) {
+    if (Backend.appKind.canRegister && (page == AuthPage.SIGN_IN || page == AuthPage.SIGN_UP)) {
       Row(
         modifier = Modifier
           .fillMaxWidth()
@@ -346,12 +346,14 @@ private fun SignInPage(
   Spacer(modifier = Modifier.height(8.dp))
   PrimaryAction(viewModel.t("Sign in", "Ingia"), canSubmit, "auth_sign_in_btn") { onSubmit(email, password) }
 
-  Spacer(modifier = Modifier.height(12.dp))
-  OutlinedButton(
-    onClick = onCreate,
-    shape = FieldShape,
-    modifier = Modifier.fillMaxWidth().height(52.dp).testTag("auth_create_btn")
-  ) { Text(viewModel.t("Create account", "Fungua akaunti"), fontWeight = FontWeight.SemiBold) }
+  if (Backend.appKind.canRegister) {
+    Spacer(modifier = Modifier.height(12.dp))
+    OutlinedButton(
+      onClick = onCreate,
+      shape = FieldShape,
+      modifier = Modifier.fillMaxWidth().height(52.dp).testTag("auth_create_btn")
+    ) { Text(viewModel.t("Create account", "Fungua akaunti"), fontWeight = FontWeight.SemiBold) }
+  }
 }
 
 @Composable
@@ -368,7 +370,7 @@ private fun SignUpPage(
   var name by remember { mutableStateOf("") }
   var email by remember { mutableStateOf("") }
   var number by remember { mutableStateOf("") }
-  var isStaff by remember { mutableStateOf(false) }
+  val isStaff = Backend.appKind.registersStaff
   var programme by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var confirm by remember { mutableStateOf("") }
@@ -398,12 +400,6 @@ private fun SignUpPage(
     color = MaterialTheme.colorScheme.onSurfaceVariant,
     modifier = Modifier.padding(start = 4.dp, top = 4.dp)
   )
-  Spacer(modifier = Modifier.height(14.dp))
-
-  Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-    Segment(viewModel.t("Student", "Mwanafunzi"), !isStaff, "auth_type_student", Modifier.weight(1f)) { isStaff = false }
-    Segment(viewModel.t("Staff", "Mfanyakazi"), isStaff, "auth_type_staff", Modifier.weight(1f)) { isStaff = true }
-  }
   Spacer(modifier = Modifier.height(14.dp))
 
   AuthField(name, { name = it }, viewModel.t("Full name", "Jina kamili"), "auth_name", icon = Icons.Default.Person)
@@ -812,30 +808,6 @@ private fun LanguageOption(label: String, selected: Boolean, tag: String, onClic
   }
 }
 
-@Composable
-private fun Segment(label: String, selected: Boolean, tag: String, modifier: Modifier, onClick: () -> Unit) {
-  Surface(
-    shape = FieldShape,
-    color = if (selected) DeepBlue.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface,
-    border = BorderStroke(
-      if (selected) 1.5.dp else 1.dp,
-      if (selected) DeepBlue else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-    ),
-    modifier = modifier
-      .clip(FieldShape)
-      .clickable { onClick() }
-      .testTag(tag)
-  ) {
-    Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp), contentAlignment = Alignment.CenterStart) {
-      Text(
-        text = label,
-        style = MaterialTheme.typography.bodyMedium,
-        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-        color = if (selected) DeepBlue else MaterialTheme.colorScheme.onSurface
-      )
-    }
-  }
-}
 
 @Composable
 private fun AuthField(

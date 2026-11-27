@@ -97,11 +97,13 @@ import com.willykez.campconnect.ui.screens.PlatformScreen
 import com.willykez.campconnect.ui.screens.SplashScreen
 import com.willykez.campconnect.ui.screens.MaintenanceScreen
 import com.willykez.campconnect.ui.screens.WaitingRoomScreen
+import com.willykez.campconnect.ui.screens.WrongAppScreen
+import com.willykez.campconnect.data.supabase.Backend
+import com.willykez.campconnect.data.model.AppKind
 import com.willykez.campconnect.ui.screens.DeadlinesScreen
 import com.willykez.campconnect.ui.screens.HomeScreen
 import com.willykez.campconnect.ui.screens.MaterialsScreen
 import com.willykez.campconnect.ui.screens.ProcessedDocumentsScreen
-import com.willykez.campconnect.ui.screens.QuizzesScreen
 import com.willykez.campconnect.ui.screens.NotificationsScreen
 import com.willykez.campconnect.ui.screens.ProfileScreen
 import com.willykez.campconnect.ui.screens.SubmissionsScreen
@@ -147,6 +149,7 @@ fun CampusConnectApp(
         onFinished = { splashDone = true }
       )
       current == null -> AuthGate(viewModel)
+      user.id == current.userId && !Backend.appKind.accepts(user) -> WrongAppScreen(viewModel, Backend.appKind, user)
       user.status != AccountStatus.APPROVED -> WaitingRoomScreen(viewModel)
       user.isPlatformAdmin -> PlatformScreen(viewModel)
       paused -> MaintenanceScreen(viewModel)
@@ -298,18 +301,20 @@ fun CampusMainApp(viewModel: CampusViewModel) {
                   onClick = { menuOpen = false; viewModel.setTab(ScreenTab.PROFILE) },
                   modifier = Modifier.testTag("menu_profile")
                 )
-                DropdownMenuItem(
-                  text = { Text(viewModel.t("Submissions", "Kazi zilizowasilishwa")) },
-                  leadingIcon = { Icon(Icons.Default.UploadFile, contentDescription = null) },
-                  onClick = { menuOpen = false; viewModel.setTab(ScreenTab.SUBMISSIONS) },
-                  modifier = Modifier.testTag("top_bar_submissions_btn")
-                )
-                DropdownMenuItem(
-                  text = { Text(viewModel.t("AI summaries", "Muhtasari wa AI")) },
-                  leadingIcon = { Icon(Icons.Default.Storage, contentDescription = null) },
-                  onClick = { menuOpen = false; viewModel.setTab(ScreenTab.PROCESSED_DOCUMENTS) },
-                  modifier = Modifier.testTag("top_bar_processed_documents_btn")
-                )
+                if (Backend.appKind != AppKind.ADMIN) {
+                  DropdownMenuItem(
+                    text = { Text(viewModel.t("Submissions", "Kazi zilizowasilishwa")) },
+                    leadingIcon = { Icon(Icons.Default.UploadFile, contentDescription = null) },
+                    onClick = { menuOpen = false; viewModel.setTab(ScreenTab.SUBMISSIONS) },
+                    modifier = Modifier.testTag("top_bar_submissions_btn")
+                  )
+                  DropdownMenuItem(
+                    text = { Text(viewModel.t("AI summaries", "Muhtasari wa AI")) },
+                    leadingIcon = { Icon(Icons.Default.Storage, contentDescription = null) },
+                    onClick = { menuOpen = false; viewModel.setTab(ScreenTab.PROCESSED_DOCUMENTS) },
+                    modifier = Modifier.testTag("top_bar_processed_documents_btn")
+                  )
+                }
                 DropdownMenuItem(
                   text = { Text(if (isDark) viewModel.t("Light mode", "Mwanga") else viewModel.t("Dark mode", "Giza")) },
                   leadingIcon = { Icon(if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode, contentDescription = null) },
@@ -323,29 +328,6 @@ fun CampusMainApp(viewModel: CampusViewModel) {
                   onClick = { menuOpen = false; viewModel.signOut() },
                   modifier = Modifier.testTag("menu_sign_out")
                 )
-              }
-            }
-
-            if (currentUser.role == Role.ADMIN) {
-              IconButton(
-                onClick = { viewModel.setTab(ScreenTab.ADMIN) },
-                modifier = Modifier.testTag("top_bar_admin_btn")
-              ) {
-                BadgedBox(
-                  badge = {
-                    if (pendingUsers.isNotEmpty()) {
-                      Badge(containerColor = WarmAmber, contentColor = Color.White) {
-                        Text("${pendingUsers.size}")
-                      }
-                    }
-                  }
-                ) {
-                  Icon(
-                    imageVector = Icons.Default.AdminPanelSettings,
-                    contentDescription = "Admin Portal",
-                    tint = if (currentTab == ScreenTab.ADMIN) DeepBlue else MaterialTheme.colorScheme.onSurface
-                  )
-                }
               }
             }
 
@@ -383,50 +365,16 @@ fun CampusMainApp(viewModel: CampusViewModel) {
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .testTag("bottom_nav_bar")
         ) {
-          NavigationBarItem(
-            selected = currentTab == ScreenTab.HOME,
-            onClick = { viewModel.setTab(ScreenTab.HOME) },
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-            label = { Text(viewModel.getString("tab_home")) },
-            colors = NavigationBarItemDefaults.colors(indicatorColor = DeepBlue.copy(alpha = 0.15f)),
-            modifier = Modifier.testTag("nav_item_home")
-          )
-
-          NavigationBarItem(
-            selected = currentTab == ScreenTab.TIMETABLE,
-            onClick = { viewModel.setTab(ScreenTab.TIMETABLE) },
-            icon = { Icon(Icons.Default.CalendarToday, contentDescription = "Timetable") },
-            label = { Text(viewModel.getString("tab_timetable")) },
-            colors = NavigationBarItemDefaults.colors(indicatorColor = DeepBlue.copy(alpha = 0.15f)),
-            modifier = Modifier.testTag("nav_item_timetable")
-          )
-
-          NavigationBarItem(
-            selected = currentTab == ScreenTab.MATERIALS,
-            onClick = { viewModel.setTab(ScreenTab.MATERIALS) },
-            icon = { Icon(Icons.Default.Folder, contentDescription = "Materials") },
-            label = { Text(viewModel.getString("tab_materials")) },
-            colors = NavigationBarItemDefaults.colors(indicatorColor = DeepBlue.copy(alpha = 0.15f)),
-            modifier = Modifier.testTag("nav_item_materials")
-          )
-
-          NavigationBarItem(
-            selected = currentTab == ScreenTab.CALENDAR || currentTab == ScreenTab.QUIZZES,
-            onClick = { viewModel.setTab(ScreenTab.CALENDAR) },
-            icon = { Icon(Icons.Default.CalendarMonth, contentDescription = "Deadlines") },
-            label = { Text(viewModel.getString("tab_calendar")) },
-            colors = NavigationBarItemDefaults.colors(indicatorColor = DeepBlue.copy(alpha = 0.15f)),
-            modifier = Modifier.testTag("nav_item_calendar")
-          )
-
-          NavigationBarItem(
-            selected = currentTab == ScreenTab.PROFILE,
-            onClick = { viewModel.setTab(ScreenTab.PROFILE) },
-            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-            label = { Text(viewModel.getString("tab_profile")) },
-            colors = NavigationBarItemDefaults.colors(indicatorColor = DeepBlue.copy(alpha = 0.15f)),
-            modifier = Modifier.testTag("nav_item_profile")
-          )
+          Backend.appKind.tabs.forEach { tab ->
+            NavigationBarItem(
+              selected = currentTab == tab,
+              onClick = { viewModel.setTab(tab) },
+              icon = { TabIcon(tab, pendingUsers.size) },
+              label = { Text(viewModel.getString(tabLabelKey(tab))) },
+              colors = NavigationBarItemDefaults.colors(indicatorColor = DeepBlue.copy(alpha = 0.15f)),
+              modifier = Modifier.testTag("nav_item_${tab.name.lowercase()}")
+            )
+          }
         }
       }
     ) { innerPadding ->
@@ -484,8 +432,6 @@ fun CampusMainApp(viewModel: CampusViewModel) {
               viewingDocCourse = course
             }
           )
-
-          ScreenTab.QUIZZES -> QuizzesScreen(viewModel = viewModel)
 
           ScreenTab.SUBMISSIONS -> SubmissionsScreen(
             viewModel = viewModel,
@@ -726,5 +672,36 @@ fun CampusMainApp(viewModel: CampusViewModel) {
         )
       }
     }
+  }
+}
+
+private fun tabLabelKey(tab: ScreenTab): String = when (tab) {
+  ScreenTab.TIMETABLE -> "tab_timetable"
+  ScreenTab.MATERIALS -> "tab_materials"
+  ScreenTab.CALENDAR -> "tab_calendar"
+  ScreenTab.SUBMISSIONS -> "tab_submissions"
+  ScreenTab.ADMIN -> "tab_admin"
+  ScreenTab.PROFILE -> "tab_profile"
+  else -> "tab_home"
+}
+
+@Composable
+private fun TabIcon(tab: ScreenTab, pendingPeople: Int) {
+  when (tab) {
+    ScreenTab.TIMETABLE -> Icon(Icons.Default.CalendarToday, contentDescription = "Timetable")
+    ScreenTab.MATERIALS -> Icon(Icons.Default.Folder, contentDescription = "Materials")
+    ScreenTab.CALENDAR -> Icon(Icons.Default.CalendarMonth, contentDescription = "Deadlines")
+    ScreenTab.SUBMISSIONS -> Icon(Icons.Default.UploadFile, contentDescription = "Submissions")
+    ScreenTab.PROFILE -> Icon(Icons.Default.Person, contentDescription = "Profile")
+    ScreenTab.ADMIN -> BadgedBox(
+      badge = {
+        if (pendingPeople > 0) {
+          Badge(containerColor = WarmAmber, contentColor = Color.White) { Text("$pendingPeople") }
+        }
+      }
+    ) {
+      Icon(Icons.Default.AdminPanelSettings, contentDescription = "Admin")
+    }
+    else -> Icon(Icons.Default.Home, contentDescription = "Home")
   }
 }
