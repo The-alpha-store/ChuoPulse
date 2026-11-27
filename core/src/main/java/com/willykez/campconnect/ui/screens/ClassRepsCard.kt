@@ -30,7 +30,7 @@ import com.willykez.campconnect.data.model.AccountStatus
 import com.willykez.campconnect.data.model.Role
 import com.willykez.campconnect.data.model.UserProfile
 import com.willykez.campconnect.ui.components.AppBottomSheet
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.viewmodel.CampusViewModel
 
 @Composable
@@ -41,11 +41,11 @@ fun ClassRepsCard(viewModel: CampusViewModel, user: UserProfile) {
   when {
     user.role == Role.STUDENT && user.isClassRep -> Card(
       shape = RoundedCornerShape(14.dp),
-      colors = CardDefaults.cardColors(containerColor = DeepBlue.copy(alpha = 0.10f)),
+      colors = CardDefaults.cardColors(containerColor = BrandPrimary.copy(alpha = 0.10f)),
       modifier = Modifier.fillMaxWidth()
     ) {
       Column(modifier = Modifier.padding(14.dp)) {
-        Text(viewModel.t("You are a class representative", "Wewe ni mwakilishi wa darasa"), fontWeight = FontWeight.Bold, color = DeepBlue)
+        Text(viewModel.t("You are a class representative", "Wewe ni mwakilishi wa darasa"), fontWeight = FontWeight.Bold, color = BrandPrimary)
         Text(
           viewModel.t(
             "You can post notices, materials, assignments and timetable changes for your class.",
@@ -125,7 +125,7 @@ private fun ClassRepsSheet(viewModel: CampusViewModel, onDismiss: () -> Unit) {
         } else {
           Button(
             onClick = { viewModel.setClassRep(m.id, true) }, shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = DeepBlue)
+            colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
           ) { Text(viewModel.t("Make rep", "Mteue")) }
         }
       }

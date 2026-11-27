@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.data.docs.DocumentKind
 import com.willykez.campconnect.data.model.AttachmentFile
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 
 @Composable
@@ -77,7 +77,7 @@ fun CampusFilePicker(
           .fillMaxWidth()
           .border(
             width = 1.5.dp,
-            color = DeepBlue.copy(alpha = 0.4f),
+            color = BrandPrimary.copy(alpha = 0.4f),
             shape = RoundedCornerShape(12.dp)
           )
           .testTag("file_picker_dropzone")
@@ -92,13 +92,13 @@ fun CampusFilePicker(
             modifier = Modifier
               .size(44.dp)
               .clip(CircleShape)
-              .background(DeepBlue.copy(alpha = 0.12f)),
+              .background(BrandPrimary.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
           ) {
             Icon(
               imageVector = Icons.Default.FolderOpen,
               contentDescription = "Upload Document",
-              tint = DeepBlue,
+              tint = BrandPrimary,
               modifier = Modifier.size(24.dp)
             )
           }
@@ -125,7 +125,7 @@ fun CampusFilePicker(
           ) {
             Surface(
               shape = RoundedCornerShape(8.dp),
-              color = DeepBlue,
+              color = BrandPrimary,
               modifier = Modifier
                 .weight(1f)
                 .clip(RoundedCornerShape(8.dp))
@@ -211,7 +211,7 @@ fun CampusFilePicker(
             Icon(
               imageVector = Icons.Default.Visibility,
               contentDescription = "Preview",
-              tint = DeepBlue
+              tint = BrandPrimary
             )
           }
 

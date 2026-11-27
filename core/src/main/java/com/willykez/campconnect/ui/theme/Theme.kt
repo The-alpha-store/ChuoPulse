@@ -10,16 +10,17 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-private val DarkColorScheme = darkColorScheme(
-  primary = PrimaryDark,
-  onPrimary = Color(0xFF001E6C),
-  primaryContainer = DeepBlueDark,
-  onPrimaryContainer = Color(0xFFDAE2FF),
+private fun darkScheme(p: AppPalette) = darkColorScheme(
+  primary = p.primaryOnDark,
+  onPrimary = p.onPrimaryOnDark,
+  primaryContainer = p.containerDark,
+  onPrimaryContainer = p.onContainerDark,
   secondary = WarmAmber,
   onSecondary = Color(0xFF452B00),
   secondaryContainer = Color(0xFF633F00),
@@ -41,11 +42,11 @@ private val DarkColorScheme = darkColorScheme(
   error = DangerRed
 )
 
-private val LightColorScheme = lightColorScheme(
-  primary = DeepBlue,
+private fun lightScheme(p: AppPalette) = lightColorScheme(
+  primary = p.accentLight,
   onPrimary = Color.White,
-  primaryContainer = Color(0xFFDDE3FF),
-  onPrimaryContainer = Color(0xFF001453),
+  primaryContainer = p.containerLight,
+  onPrimaryContainer = p.onContainerLight,
   secondary = WarmAmber,
   onSecondary = Color.White,
   secondaryContainer = WarmAmberLight,
@@ -86,7 +87,11 @@ fun CampusConnectTheme(
     AppThemeMode.LIGHT -> false
     AppThemeMode.DARK -> true
   }
-  val colorScheme = if (useDarkTheme) DarkColorScheme else LightColorScheme
+  val palette = Brand.palette
+  val colorScheme = remember(useDarkTheme, palette) { if (useDarkTheme) darkScheme(palette) else lightScheme(palette) }
+
+  // Lets BrandPrimary pick the right accent for the current theme.
+  SideEffect { if (Brand.dark != useDarkTheme) Brand.dark = useDarkTheme }
 
   val view = LocalView.current
   if (!view.isInEditMode) {

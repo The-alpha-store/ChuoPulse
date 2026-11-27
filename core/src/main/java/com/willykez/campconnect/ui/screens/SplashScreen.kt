@@ -32,9 +32,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.willykez.campconnect.ui.theme.DeepBlue
-import com.willykez.campconnect.ui.theme.DeepBlueDark
-import com.willykez.campconnect.ui.theme.PrimaryLightBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
+import com.willykez.campconnect.ui.theme.identity
+import com.willykez.campconnect.ui.theme.BrandDeep
+import com.willykez.campconnect.ui.theme.BrandLight
 import com.willykez.campconnect.util.AppBrand
 import kotlinx.coroutines.delay
 
@@ -56,7 +57,7 @@ fun SplashScreen(swahili: Boolean, onFinished: () -> Unit) {
   Box(
     modifier = Modifier
       .fillMaxSize()
-      .background(Brush.verticalGradient(listOf(DeepBlueDark, DeepBlue, PrimaryLightBlue)))
+      .background(Brush.verticalGradient(listOf(BrandDeep, BrandPrimary, BrandLight)))
       .testTag("splash_screen"),
     contentAlignment = Alignment.Center
   ) {
@@ -74,7 +75,7 @@ fun SplashScreen(swahili: Boolean, onFinished: () -> Unit) {
           modifier = Modifier.size(76.dp).clip(RoundedCornerShape(24.dp)).background(Color.White),
           contentAlignment = Alignment.Center
         ) {
-          Icon(Icons.Default.School, contentDescription = null, tint = DeepBlue, modifier = Modifier.size(44.dp))
+          Icon(com.willykez.campconnect.data.supabase.Backend.appKind.identity().icon, contentDescription = null, tint = BrandPrimary, modifier = Modifier.size(44.dp))
         }
       }
       Spacer(modifier = Modifier.height(24.dp))
@@ -87,7 +88,8 @@ fun SplashScreen(swahili: Boolean, onFinished: () -> Unit) {
       )
       Spacer(modifier = Modifier.height(6.dp))
       Text(
-        if (swahili) AppBrand.TAGLINE_SW else AppBrand.TAGLINE_EN,
+        com.willykez.campconnect.data.supabase.Backend.appKind.identity().let { if (swahili) it.roleSw else it.roleEn }.uppercase() +
+          "  ·  " + if (swahili) AppBrand.TAGLINE_SW else AppBrand.TAGLINE_EN,
         color = Color.White.copy(alpha = 0.82f),
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.alpha(textAlpha.value)

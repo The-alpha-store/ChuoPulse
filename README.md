@@ -31,7 +31,8 @@ All four use the same Supabase project and the **same accounts**: one email and 
   created by the app manager or a campus administrator, so those apps have sign-in only.
 * Tabs differ: students and lecturers get Home, Timetable, Materials, Deadlines, Profile; administrators get Home, Timetable,
   Admin (people, setup, AI timetable assistant), Deadlines, Profile; the owner app is the platform screen.
-* Each app has its own icon colour, name and storage, so sessions are separate. Security is still enforced by the server
+* Each app has its own colours (Student blue, Admin green, Lecturer amber, Owner slate; palettes in `core/.../ui/theme/Brand.kt`,
+  names and icons in `AppIdentity.kt`), sign-in wording, icon, name and storage, so sessions are separate. Security is still enforced by the server
   (row-level security); the separate apps add clarity and control, not a replacement for it.
 * Role rules live in `core/.../data/model/AppKind.kt`. Each app's `MainActivity` only sets its `AppKind`.
 

@@ -37,7 +37,7 @@ import com.willykez.campconnect.ui.components.PickerField
 import com.willykez.campconnect.ui.components.PickerItem
 import com.willykez.campconnect.ui.components.PickerSheet
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.viewmodel.CampusViewModel
 
@@ -198,7 +198,7 @@ private fun SetupCard(
     Column(modifier = Modifier.padding(16.dp)) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Text("$count", style = MaterialTheme.typography.titleMedium, color = DeepBlue, fontWeight = FontWeight.Bold)
+        Text("$count", style = MaterialTheme.typography.titleMedium, color = BrandPrimary, fontWeight = FontWeight.Bold)
       }
       Spacer(modifier = Modifier.height(4.dp))
       Text(
@@ -211,7 +211,7 @@ private fun SetupCard(
         Button(
           onClick = primary.second,
           shape = RoundedCornerShape(12.dp),
-          colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+          colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
           modifier = Modifier.testTag("${tag}_add")
         ) { Text(primary.first) }
         if (secondary != null) {
@@ -266,7 +266,7 @@ private fun SetupSheet(kind: SetupKind, viewModel: CampusViewModel, programmes: 
             else -> first.isNotBlank()
           },
           shape = RoundedCornerShape(14.dp),
-          colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+          colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
           modifier = Modifier.weight(1f).height(52.dp).testTag("setup_save_btn")
         ) { Text(viewModel.t("Save", "Hifadhi"), fontWeight = FontWeight.SemiBold) }
     }

@@ -6,8 +6,8 @@ import androidx.compose.material.icons.filled.CalendarToday
 import com.willykez.campconnect.ui.components.ActionButton
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.material.icons.filled.EventAvailable
-import com.willykez.campconnect.ui.theme.DeepBlueDark
-import com.willykez.campconnect.ui.theme.PrimaryLightBlue
+import com.willykez.campconnect.ui.theme.BrandDeep
+import com.willykez.campconnect.ui.theme.BrandLight
 import com.willykez.campconnect.util.AppBrand
 import com.willykez.campconnect.data.model.SessionStatus
 import androidx.compose.foundation.background
@@ -65,7 +65,7 @@ import com.willykez.campconnect.ui.components.AnnouncementCard
 import com.willykez.campconnect.ui.components.DeadlineCard
 import com.willykez.campconnect.ui.components.OfflineBanner
 import com.willykez.campconnect.ui.components.SessionCard
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.ui.theme.WarmAmberLight
@@ -121,7 +121,7 @@ fun HomeScreen(
         modifier = Modifier
           .fillMaxWidth()
           .clip(RoundedCornerShape(26.dp))
-          .background(Brush.linearGradient(listOf(DeepBlueDark, DeepBlue, PrimaryLightBlue)))
+          .background(Brush.linearGradient(listOf(BrandDeep, BrandPrimary, BrandLight)))
           .drawBehind {
             drawCircle(Color.White.copy(alpha = 0.07f), radius = size.minDimension * 0.55f, center = Offset(size.width * 0.95f, size.height * 0.05f))
             drawCircle(Color.White.copy(alpha = 0.06f), radius = size.minDimension * 0.35f, center = Offset(size.width * 0.78f, size.height * 1.0f))
@@ -212,7 +212,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.width(12.dp))
             Column {
               Text(
-                text = "Guest Access • Account Pending Registry Approval",
+                text = viewModel.t("Guest Access • Account Pending Approval", "Ufikiaji wa Mgeni • Akaunti Inasubiri Idhini"),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF78350F)
@@ -279,11 +279,11 @@ fun HomeScreen(
               modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(DeepBlue.copy(alpha = 0.06f))
+                .background(BrandPrimary.copy(alpha = 0.06f))
                 .padding(20.dp),
               horizontalAlignment = Alignment.CenterHorizontally
             ) {
-              Icon(Icons.Default.EventAvailable, contentDescription = null, tint = DeepBlue, modifier = Modifier.size(32.dp))
+              Icon(Icons.Default.EventAvailable, contentDescription = null, tint = BrandPrimary, modifier = Modifier.size(32.dp))
               Spacer(modifier = Modifier.height(8.dp))
               Text(viewModel.t("No classes today", "Hakuna vipindi leo"), fontWeight = FontWeight.Bold)
               Text(
@@ -321,7 +321,7 @@ fun HomeScreen(
             LecturerQuickActionButton(
               title = "Post Notice",
               icon = Icons.Default.Campaign,
-              color = DeepBlue,
+              color = BrandPrimary,
               onClick = onOpenPublishDialog,
               modifier = Modifier.weight(1f)
             )
@@ -418,7 +418,7 @@ fun HomeScreen(
         item {
           Card(
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = DeepBlue),
+            colors = CardDefaults.cardColors(containerColor = BrandPrimary),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             modifier = Modifier.fillMaxWidth().testTag("admin_summary_card")
           ) {
@@ -429,7 +429,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
               ) {
                 Text(
-                  text = "Administrator Control Center",
+                  text = viewModel.t("Administrator Control Center", "Kituo cha Msimamizi"),
                   style = MaterialTheme.typography.titleMedium,
                   color = Color.White,
                   fontWeight = FontWeight.Bold
@@ -442,7 +442,7 @@ fun HomeScreen(
               }
               Spacer(modifier = Modifier.height(8.dp))
               Text(
-                text = "Academic Registry & Faculty Schedule Management",
+                text = viewModel.t("People, timetable and notices for your campus", "Watu, ratiba na matangazo ya chuo chako"),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.8f)
               )
@@ -451,9 +451,9 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
               ) {
-                AdminStatItem("Pending Users", "${pendingUsers.size}", WarmAmberLight)
-                AdminStatItem("Active Sessions", "${sessions.size}", Color(0xFFDCFCE7))
-                AdminStatItem("Announcements", "${announcements.size}", Color(0xFFE0E7FF))
+                AdminStatItem(viewModel.t("Pending Users", "Wanaosubiri"), "${pendingUsers.size}", WarmAmberLight)
+                AdminStatItem(viewModel.t("Active Sessions", "Vipindi"), "${sessions.size}", Color(0xFFDCFCE7))
+                AdminStatItem(viewModel.t("Announcements", "Matangazo"), "${announcements.size}", Color(0xFFE0E7FF))
               }
               Spacer(modifier = Modifier.height(14.dp))
               Button(
@@ -463,8 +463,8 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth().height(52.dp).testTag("go_to_admin_portal_btn")
               ) {
                 Text(
-                  text = "Open Approvals & Audit Log (${pendingUsers.size} pending)",
-                  color = DeepBlue,
+                  text = viewModel.t("Open Approvals & Audit Log (${pendingUsers.size} pending)", "Fungua Idhini na Kumbukumbu (${pendingUsers.size} zinasubiri)"),
+                  color = BrandPrimary,
                   fontWeight = FontWeight.Bold
                 )
               }
@@ -488,9 +488,9 @@ fun HomeScreen(
             ) {
               Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
-                  modifier = Modifier.size(84.dp).clip(RoundedCornerShape(28.dp)).background(DeepBlue.copy(alpha = 0.08f)),
+                  modifier = Modifier.size(84.dp).clip(RoundedCornerShape(28.dp)).background(BrandPrimary.copy(alpha = 0.08f)),
                   contentAlignment = Alignment.Center
-                ) { Icon(Icons.Default.EventAvailable, contentDescription = null, tint = DeepBlue, modifier = Modifier.size(40.dp)) }
+                ) { Icon(Icons.Default.EventAvailable, contentDescription = null, tint = BrandPrimary, modifier = Modifier.size(40.dp)) }
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
                   viewModel.t("No sessions registered yet", "Hakuna vipindi vilivyosajiliwa bado"),
@@ -624,15 +624,15 @@ private fun HomeSectionHeader(title: String, action: String, onAction: () -> Uni
     verticalAlignment = Alignment.CenterVertically
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-      Box(Modifier.size(width = 4.dp, height = 18.dp).clip(RoundedCornerShape(2.dp)).background(DeepBlue))
+      Box(Modifier.size(width = 4.dp, height = 18.dp).clip(RoundedCornerShape(2.dp)).background(BrandPrimary))
       Spacer(modifier = Modifier.width(8.dp))
       Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     }
-    Surface(shape = RoundedCornerShape(50), color = DeepBlue.copy(alpha = 0.10f), onClick = onAction) {
+    Surface(shape = RoundedCornerShape(50), color = BrandPrimary.copy(alpha = 0.10f), onClick = onAction) {
       Text(
         text = action,
         style = MaterialTheme.typography.labelMedium,
-        color = DeepBlue,
+        color = BrandPrimary,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
       )

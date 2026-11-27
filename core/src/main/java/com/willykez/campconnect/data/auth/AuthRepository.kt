@@ -437,7 +437,7 @@ class AuthRepository(
     val profile = profileFrom(row)
     if (profile.status == AccountStatus.REJECTED) return AuthOutcome.Failure(AuthError.ACCOUNT_NOT_ACTIVE)
 
-    if (profile.role == Role.ADMIN && profile.status == AccountStatus.APPROVED) {
+    if (profile.role == Role.ADMIN && profile.status == AccountStatus.APPROVED && Backend.appKind.accepts(profile)) {
       return beginMfa(access, refresh, profile, row)
     }
     return startLiveSession(access, refresh, profile, row)

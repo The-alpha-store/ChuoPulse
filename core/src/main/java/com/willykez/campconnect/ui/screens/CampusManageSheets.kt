@@ -29,7 +29,7 @@ import com.willykez.campconnect.data.model.Role
 import com.willykez.campconnect.data.model.University
 import com.willykez.campconnect.ui.components.AppBottomSheet
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.viewmodel.CampusViewModel
 
 @Composable
@@ -59,7 +59,7 @@ fun EditCampusDetailsSheet(viewModel: CampusViewModel, campus: University, canRe
         },
         enabled = !busy,
         shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.weight(1f).height(56.dp).testTag("campus_details_save")
       ) { Text(viewModel.t("Save", "Hifadhi"), fontWeight = FontWeight.SemiBold) }
     }
@@ -118,7 +118,7 @@ fun AddCampusUserSheet(
         },
         enabled = ready && !busy,
         shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.weight(1f).height(56.dp).testTag("add_user_btn")
       ) { Text(viewModel.t("Add person", "Ongeza"), fontWeight = FontWeight.SemiBold) }
     }
@@ -195,7 +195,7 @@ fun MaintenanceSheet(viewModel: CampusViewModel, campus: University, onDismiss: 
       Button(
         onClick = { viewModel.setCampusMaintenance(campus.id, on, note); onDismiss() },
         shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = if (on) DangerRed else DeepBlue),
+        colors = ButtonDefaults.buttonColors(containerColor = if (on) DangerRed else BrandPrimary),
         modifier = Modifier.weight(1f).height(56.dp).testTag("maintenance_apply")
       ) {
         Text(

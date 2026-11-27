@@ -78,7 +78,7 @@ class CampusViewModel(
   private val _currentTab = MutableStateFlow(ScreenTab.HOME)
   val currentTab: StateFlow<ScreenTab> = _currentTab.asStateFlow()
 
-  private val _selectedDay = MutableStateFlow(todayDay())
+  private val _selectedDay = MutableStateFlow(defaultTimetableDay())
   val selectedDay: StateFlow<Int> = _selectedDay.asStateFlow()
 
   private val _isWeekView = MutableStateFlow(false)
@@ -182,7 +182,7 @@ class CampusViewModel(
   private fun resetNavigation() {
     repository.peopleAdmin.clear()
     _currentTab.value = ScreenTab.HOME
-    _selectedDay.value = todayDay()
+    _selectedDay.value = defaultTimetableDay()
     _isWeekView.value = false
     _submissionFilterCourse.value = "ALL"
     _message.value = null
@@ -193,8 +193,8 @@ class CampusViewModel(
     AuthError.EMAIL_INVALID -> t("That email address does not look right.", "Anwani hii ya barua pepe haionekani sahihi.")
     AuthError.UNIVERSITY_REQUIRED -> t("Please choose your university.", "Tafadhali chagua chuo chako.")
     AuthError.USE_EMAIL -> t(
-      "That number exists at more than one university. Sign in with your email instead.",
-      "Namba hiyo ipo katika vyuo zaidi ya kimoja. Ingia kwa barua pepe yako."
+      "Sign in with the email address of your account.",
+      "Ingia kwa anwani ya barua pepe ya akaunti yako."
     )
     AuthError.EMAIL_TAKEN -> t("An account with this email already exists.", "Akaunti yenye barua pepe hii tayari ipo.")
     AuthError.NUMBER_INVALID -> t(
@@ -242,10 +242,11 @@ class CampusViewModel(
     PasswordProblem.REPEATED -> t("Too repetitive", "Inarudiarudia mno")
   }
 
-  fun todayDay(): Int = when (java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK)) {
-    java.util.Calendar.SUNDAY -> 1
-    else -> java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK) - 1
-  }
+  /** 1 = Monday ... 7 = Sunday (same numbering as the timetable and the Home screen). */
+  fun todayDay(): Int = java.time.LocalDate.now().dayOfWeek.value
+
+  /** Day the timetable opens on: the timetable has no Sunday, so Sunday shows Monday. */
+  fun defaultTimetableDay(): Int = todayDay().let { if (it > 6) 1 else it }
 
   fun canEditOrDelete(uploaderOrAuthorId: String): Boolean = repository.canEditOrDelete(uploaderOrAuthorId)
 

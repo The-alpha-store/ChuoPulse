@@ -61,7 +61,7 @@ import com.willykez.campconnect.data.docs.LecturerRef
 import com.willykez.campconnect.data.docs.PSession
 import com.willykez.campconnect.data.docs.TimetableProposal
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.viewmodel.AssistantPhase
 import com.willykez.campconnect.viewmodel.CampusViewModel
@@ -72,13 +72,13 @@ private val DAY_NAMES = listOf("", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
 fun TimetableAssistantCard(viewModel: CampusViewModel, onOpen: () -> Unit) {
   Surface(
     shape = RoundedCornerShape(20.dp),
-    color = DeepBlue.copy(alpha = 0.08f),
-    border = BorderStroke(1.dp, DeepBlue.copy(alpha = 0.25f)),
+    color = BrandPrimary.copy(alpha = 0.08f),
+    border = BorderStroke(1.dp, BrandPrimary.copy(alpha = 0.25f)),
     modifier = Modifier.fillMaxWidth().testTag("setup_ai_assistant")
   ) {
     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
       Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = "AI", tint = DeepBlue)
+        Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = "AI", tint = BrandPrimary)
         Spacer(modifier = Modifier.width(8.dp))
         Text(
           text = viewModel.t("AI timetable assistant", "Msaidizi wa ratiba (AI)"),
@@ -429,7 +429,7 @@ private fun EditSessionDialog(
             val on = d == day
             Surface(
               shape = RoundedCornerShape(12.dp),
-              color = if (on) DeepBlue else MaterialTheme.colorScheme.surfaceVariant,
+              color = if (on) BrandPrimary else MaterialTheme.colorScheme.surfaceVariant,
               modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { day = d }
             ) {
               Text(

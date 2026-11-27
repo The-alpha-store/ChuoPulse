@@ -67,7 +67,7 @@ import com.willykez.campconnect.data.model.SessionStatus
 import com.willykez.campconnect.ui.util.formatClock
 import com.willykez.campconnect.ui.theme.DangerRed
 import com.willykez.campconnect.ui.theme.DangerRedLight
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.SuccessGreenLight
 import com.willykez.campconnect.ui.theme.WarmAmber
@@ -132,7 +132,7 @@ fun OfflineBanner(
         Icon(
           imageVector = if (isOffline) Icons.Default.CloudOff else Icons.Default.Sync,
           contentDescription = "Sync Status",
-          tint = if (isOffline) WarmAmber else DeepBlue,
+          tint = if (isOffline) WarmAmber else BrandPrimary,
           modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -151,7 +151,7 @@ fun OfflineBanner(
         label = if (isOffline) "Go online" else "Sync",
         icon = Icons.Default.Sync,
         onClick = onSyncClick,
-        color = if (isOffline) WarmAmber else DeepBlue,
+        color = if (isOffline) WarmAmber else BrandPrimary,
         filled = true,
         tag = "sync_button"
       )
@@ -175,7 +175,7 @@ fun SessionCard(
   val accent = when (session.status) {
     SessionStatus.CHANGED -> WarmAmber
     SessionStatus.CANCELLED -> DangerRed
-    SessionStatus.SCHEDULED -> DeepBlue
+    SessionStatus.SCHEDULED -> BrandPrimary
   }
   val shape = RoundedCornerShape(20.dp)
 
@@ -221,9 +221,9 @@ fun SessionCard(
           verticalAlignment = Alignment.CenterVertically
         ) {
           Box(
-            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(DeepBlue.copy(alpha = 0.12f)).padding(horizontal = 8.dp, vertical = 3.dp)
+            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(BrandPrimary.copy(alpha = 0.12f)).padding(horizontal = 8.dp, vertical = 3.dp)
           ) {
-            Text(text = session.courseCode, color = DeepBlue, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+            Text(text = session.courseCode, color = BrandPrimary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
           }
           when (session.status) {
             SessionStatus.CHANGED -> StatusBadge(text = "Room changed", backgroundColor = WarmAmberLight, contentColor = Color(0xFFB45309))
@@ -245,7 +245,7 @@ fun SessionCard(
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(Icons.Default.LocationOn, contentDescription = "Venue", modifier = Modifier.size(16.dp), tint = if (isChanged) WarmAmber else DeepBlue)
+          Icon(Icons.Default.LocationOn, contentDescription = "Venue", modifier = Modifier.size(16.dp), tint = if (isChanged) WarmAmber else BrandPrimary)
           Spacer(modifier = Modifier.width(6.dp))
           Text(
             text = session.venue,
@@ -328,7 +328,7 @@ fun AnnouncementCard(
       .testTag("announcement_card_${announcement.id}")
   ) {
     Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-      Box(Modifier.width(5.dp).fillMaxHeight().background(if (isUrgent) DangerRed else if (announcement.priority == AnnouncementPriority.ACADEMIC) DeepBlue else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)))
+      Box(Modifier.width(5.dp).fillMaxHeight().background(if (isUrgent) DangerRed else if (announcement.priority == AnnouncementPriority.ACADEMIC) BrandPrimary else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)))
       Column(modifier = Modifier.weight(1f).padding(14.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -337,12 +337,12 @@ fun AnnouncementCard(
       ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
           val audienceBg = when (announcement.audienceType) {
-            AudienceType.CAMPUS -> DeepBlue.copy(alpha = 0.15f)
+            AudienceType.CAMPUS -> BrandPrimary.copy(alpha = 0.15f)
             AudienceType.PROGRAMME -> WarmAmber.copy(alpha = 0.15f)
             AudienceType.COURSE -> SuccessGreen.copy(alpha = 0.15f)
           }
           val audienceText = when (announcement.audienceType) {
-            AudienceType.CAMPUS -> DeepBlue
+            AudienceType.CAMPUS -> BrandPrimary
             AudienceType.PROGRAMME -> Color(0xFFB45309)
             AudienceType.COURSE -> SuccessGreen
           }
@@ -362,8 +362,8 @@ fun AnnouncementCard(
             )
             AnnouncementPriority.ACADEMIC -> StatusBadge(
               text = "ACADEMIC",
-              backgroundColor = DeepBlue.copy(alpha = 0.12f),
-              contentColor = DeepBlue
+              backgroundColor = BrandPrimary.copy(alpha = 0.12f),
+              contentColor = BrandPrimary
             )
             AnnouncementPriority.NORMAL -> Unit
           }
@@ -392,7 +392,7 @@ fun AnnouncementCard(
             modifier = Modifier
               .size(10.dp)
               .clip(CircleShape)
-              .background(DeepBlue)
+              .background(BrandPrimary)
           )
         } else if (showReadCount) {
           Text(
@@ -435,14 +435,14 @@ fun AnnouncementCard(
           Icon(
             imageVector = Icons.Default.Attachment,
             contentDescription = "Attachment",
-            tint = DeepBlue,
+            tint = BrandPrimary,
             modifier = Modifier.size(14.dp)
           )
           Spacer(modifier = Modifier.width(4.dp))
           Text(
             text = "${announcement.attachment.fileName} (${announcement.attachment.fileSize})",
             style = MaterialTheme.typography.labelSmall,
-            color = DeepBlue,
+            color = BrandPrimary,
             fontWeight = FontWeight.Medium
           )
         }
@@ -559,7 +559,7 @@ fun DeadlineCard(
               text = deadline.courseCode,
               style = MaterialTheme.typography.labelSmall,
               fontWeight = FontWeight.Bold,
-              color = DeepBlue
+              color = BrandPrimary
             )
 
             StatusBadge(
@@ -634,7 +634,7 @@ fun DeadlineCard(
             Text(
               text = "Preferences: ${deadline.acceptedFormats}",
               style = MaterialTheme.typography.labelSmall,
-              color = DeepBlue,
+              color = BrandPrimary,
               fontWeight = FontWeight.Medium
             )
           }
@@ -665,7 +665,7 @@ fun DeadlineCard(
             if (onSubmitClick != null) {
               Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = DeepBlue,
+                color = BrandPrimary,
                 modifier = Modifier
                   .clip(RoundedCornerShape(8.dp))
                   .clickable { onSubmitClick() }

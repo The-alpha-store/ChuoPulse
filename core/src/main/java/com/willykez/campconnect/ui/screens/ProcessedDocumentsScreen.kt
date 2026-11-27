@@ -1,7 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 package com.willykez.campconnect.ui.screens
 
-import com.willykez.campconnect.ui.theme.DeepBlueDark
+import com.willykez.campconnect.ui.theme.BrandDeep
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.runtime.LaunchedEffect
@@ -11,8 +11,8 @@ import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import com.willykez.campconnect.ui.theme.DeepBlue
-import com.willykez.campconnect.ui.theme.PrimaryLightBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
+import com.willykez.campconnect.ui.theme.BrandLight
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -160,7 +160,7 @@ fun ProcessedDocumentsScreen(
       Modifier
         .fillMaxWidth()
         .clip(RoundedCornerShape(24.dp))
-        .background(Brush.linearGradient(listOf(DeepBlueDark, DeepBlue, PrimaryLightBlue)))
+        .background(Brush.linearGradient(listOf(BrandDeep, BrandPrimary, BrandLight)))
         .drawBehind {
           drawCircle(Color.White.copy(alpha = 0.07f), radius = size.minDimension * 0.55f, center = Offset(size.width * 0.95f, size.height * 0.02f))
           drawCircle(Color.White.copy(alpha = 0.06f), radius = size.minDimension * 0.35f, center = Offset(size.width * 0.08f, size.height * 1.0f))
@@ -212,7 +212,7 @@ fun ProcessedDocumentsScreen(
         Spacer(Modifier.height(14.dp))
         Button(
           onClick = { addDocuments() },
-          colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = DeepBlue),
+          colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = BrandPrimary),
           shape = RoundedCornerShape(14.dp),
           modifier = Modifier.fillMaxWidth().height(50.dp).testTag("analyse_document_btn")
         ) {
@@ -253,8 +253,8 @@ fun ProcessedDocumentsScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
       ) {
-        Box(Modifier.size(84.dp).clip(RoundedCornerShape(28.dp)).background(DeepBlue.copy(alpha = 0.08f)), contentAlignment = Alignment.Center) {
-          Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(40.dp), tint = DeepBlue)
+        Box(Modifier.size(84.dp).clip(RoundedCornerShape(28.dp)).background(BrandPrimary.copy(alpha = 0.08f)), contentAlignment = Alignment.Center) {
+          Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(40.dp), tint = BrandPrimary)
         }
         Spacer(Modifier.height(12.dp))
         Text(
@@ -546,12 +546,12 @@ private fun DocumentCard(
             if (document.tags.split(",").any { it.trim() == "ai" }) {
               Spacer(Modifier.width(6.dp))
               Row(
-                Modifier.clip(RoundedCornerShape(6.dp)).background(DeepBlue.copy(alpha = 0.12f)).padding(horizontal = 6.dp, vertical = 2.dp),
+                Modifier.clip(RoundedCornerShape(6.dp)).background(BrandPrimary.copy(alpha = 0.12f)).padding(horizontal = 6.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically
               ) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = DeepBlue, modifier = Modifier.size(11.dp))
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = BrandPrimary, modifier = Modifier.size(11.dp))
                 Spacer(Modifier.width(3.dp))
-                Text("AI", style = MaterialTheme.typography.labelSmall, color = DeepBlue, fontWeight = FontWeight.Bold)
+                Text("AI", style = MaterialTheme.typography.labelSmall, color = BrandPrimary, fontWeight = FontWeight.Bold)
               }
             }
           }
@@ -590,8 +590,8 @@ private fun DocumentCard(
         }
         else -> {
           Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(DeepBlue.copy(alpha = 0.06f))
-              .border(1.dp, DeepBlue.copy(alpha = 0.12f), RoundedCornerShape(12.dp)).padding(12.dp)
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(BrandPrimary.copy(alpha = 0.06f))
+              .border(1.dp, BrandPrimary.copy(alpha = 0.12f), RoundedCornerShape(12.dp)).padding(12.dp)
           ) {
             Text(t("SUMMARY PREVIEW", "MUHTASARI MFUPI"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(4.dp))

@@ -46,7 +46,7 @@ import com.willykez.campconnect.data.docs.DocumentKind
 import com.willykez.campconnect.data.docs.OfficeReader
 import com.willykez.campconnect.data.docs.SheetData
 import com.willykez.campconnect.data.model.AttachmentFile
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -158,7 +158,7 @@ private fun WordBlock(block: DocBlock) {
       )
     }
     is DocBlock.ListItem -> Row(modifier = Modifier.padding(start = (block.level * 18).dp)) {
-      Text(text = "•", style = MaterialTheme.typography.bodyLarge, color = DeepBlue, modifier = Modifier.width(18.dp))
+      Text(text = "•", style = MaterialTheme.typography.bodyLarge, color = BrandPrimary, modifier = Modifier.width(18.dp))
       SelectionContainer(modifier = Modifier.weight(1f)) {
         Text(
           text = block.text,
@@ -235,8 +235,8 @@ private fun SheetPages(sheets: List<SheetData>, onPageLabel: (String?) -> Unit) 
           Box(
             modifier = Modifier
               .clip(RoundedCornerShape(50))
-              .background(if (on) DeepBlue else PageSurface)
-              .border(1.dp, if (on) DeepBlue else PageBorder, RoundedCornerShape(50))
+              .background(if (on) BrandPrimary else PageSurface)
+              .border(1.dp, if (on) BrandPrimary else PageBorder, RoundedCornerShape(50))
               .clickable { selected = i }
               .padding(horizontal = 14.dp, vertical = 8.dp)
               .testTag("sheet_tab_$i")

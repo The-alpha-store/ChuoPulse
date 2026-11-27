@@ -22,7 +22,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 
 @Composable
 fun ActionButton(
@@ -30,7 +30,7 @@ fun ActionButton(
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   icon: ImageVector? = null,
-  color: Color = DeepBlue,
+  color: Color = BrandPrimary,
   filled: Boolean = false,
   tag: String? = null
 ) {
@@ -68,7 +68,7 @@ fun SoftIconButton(
   contentDescription: String,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
-  color: Color = DeepBlue,
+  color: Color = BrandPrimary,
   tag: String? = null
 ) {
   Surface(

@@ -15,8 +15,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Brush
-import com.willykez.campconnect.ui.theme.DeepBlueDark
-import com.willykez.campconnect.ui.theme.PrimaryLightBlue
+import com.willykez.campconnect.ui.theme.BrandDeep
+import com.willykez.campconnect.ui.theme.BrandLight
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -73,7 +73,7 @@ import com.willykez.campconnect.ui.components.StatusBadge
 import com.willykez.campconnect.ui.theme.AppThemeMode
 import com.willykez.campconnect.ui.theme.AppThemeSettings
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.util.syncStatusText
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.WarmAmber
@@ -109,7 +109,7 @@ fun ProfileScreen(
           .fillMaxWidth()
           .padding(top = 8.dp)
           .clip(RoundedCornerShape(24.dp))
-          .background(Brush.linearGradient(listOf(DeepBlueDark, DeepBlue, PrimaryLightBlue)))
+          .background(Brush.linearGradient(listOf(BrandDeep, BrandPrimary, BrandLight)))
           .drawBehind {
             drawCircle(Color.White.copy(alpha = 0.07f), radius = size.minDimension * 0.6f, center = Offset(size.width * 0.92f, size.height * 0.0f))
             drawCircle(Color.White.copy(alpha = 0.06f), radius = size.minDimension * 0.4f, center = Offset(size.width * 0.05f, size.height * 0.95f))
@@ -123,7 +123,7 @@ fun ProfileScreen(
             contentAlignment = Alignment.Center
           ) {
             Box(Modifier.fillMaxSize().clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
-              Text(user.avatarInitials, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = DeepBlue)
+              Text(user.avatarInitials, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = BrandPrimary)
             }
           }
           Spacer(modifier = Modifier.height(12.dp))
@@ -142,7 +142,7 @@ fun ProfileScreen(
                 Role.ADMIN -> viewModel.t("Administrator", "Msimamizi")
               },
               backgroundColor = Color.White,
-              contentColor = DeepBlue
+              contentColor = BrandPrimary
             )
             Spacer(modifier = Modifier.width(8.dp))
             StatusBadge(
@@ -231,7 +231,7 @@ fun ProfileScreen(
             verticalAlignment = Alignment.CenterVertically
           ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(imageVector = Icons.Default.Language, contentDescription = "Language", tint = DeepBlue)
+              Icon(imageVector = Icons.Default.Language, contentDescription = "Language", tint = BrandPrimary)
               Spacer(modifier = Modifier.width(10.dp))
               Column {
                 Text(
@@ -249,7 +249,7 @@ fun ProfileScreen(
 
             Surface(
               shape = RoundedCornerShape(8.dp),
-              color = DeepBlue.copy(alpha = 0.12f),
+              color = BrandPrimary.copy(alpha = 0.12f),
               modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { viewModel.toggleLanguage() }
@@ -260,7 +260,7 @@ fun ProfileScreen(
                 text = if (appLanguage == AppLanguage.ENGLISH) "Switch to Kiswahili" else "Badili kwa Kiingereza",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
-                color = DeepBlue
+                color = BrandPrimary
               )
             }
           }
@@ -275,7 +275,7 @@ fun ProfileScreen(
             verticalAlignment = Alignment.CenterVertically
           ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(imageVector = Icons.Default.AccessTime, contentDescription = "Time format", tint = DeepBlue)
+              Icon(imageVector = Icons.Default.AccessTime, contentDescription = "Time format", tint = BrandPrimary)
               Spacer(modifier = Modifier.width(10.dp))
               Column {
                 Text(
@@ -293,7 +293,7 @@ fun ProfileScreen(
             Switch(
               checked = is24Hour,
               onCheckedChange = { viewModel.toggle24HourFormat() },
-              colors = SwitchDefaults.colors(checkedThumbColor = DeepBlue),
+              colors = SwitchDefaults.colors(checkedThumbColor = BrandPrimary),
               modifier = Modifier.testTag("toggle_24h_switch")
             )
           }
@@ -308,7 +308,7 @@ fun ProfileScreen(
             verticalAlignment = Alignment.CenterVertically
           ) {
             Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-              Icon(imageVector = Icons.Default.CloudOff, contentDescription = "Sync status", tint = if (isOffline) WarmAmber else DeepBlue)
+              Icon(imageVector = Icons.Default.CloudOff, contentDescription = "Sync status", tint = if (isOffline) WarmAmber else BrandPrimary)
               Spacer(modifier = Modifier.width(10.dp))
               Column {
                 Text(
@@ -448,8 +448,8 @@ fun ProfileScreen(
 @Composable
 fun ProfileSectionTitle(text: String, icon: ImageVector) {
   Row(verticalAlignment = Alignment.CenterVertically) {
-    Box(Modifier.size(28.dp).clip(RoundedCornerShape(9.dp)).background(DeepBlue.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
-      Icon(icon, contentDescription = null, tint = DeepBlue, modifier = Modifier.size(16.dp))
+    Box(Modifier.size(28.dp).clip(RoundedCornerShape(9.dp)).background(BrandPrimary.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
+      Icon(icon, contentDescription = null, tint = BrandPrimary, modifier = Modifier.size(16.dp))
     }
     Spacer(Modifier.width(10.dp))
     Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -463,8 +463,8 @@ fun ProfileInfoRow(label: String, value: String, icon: ImageVector? = null) {
     verticalAlignment = Alignment.CenterVertically
   ) {
     if (icon != null) {
-      Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(DeepBlue.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) {
-        Icon(icon, contentDescription = null, tint = DeepBlue, modifier = Modifier.size(20.dp))
+      Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(BrandPrimary.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) {
+        Icon(icon, contentDescription = null, tint = BrandPrimary, modifier = Modifier.size(20.dp))
       }
       Spacer(Modifier.width(12.dp))
     }

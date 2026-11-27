@@ -67,7 +67,7 @@ import com.willykez.campconnect.ui.components.PickerItem
 import com.willykez.campconnect.ui.components.PickerSheet
 import com.willykez.campconnect.ui.components.SheetButtons
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.viewmodel.CampusViewModel
@@ -176,7 +176,7 @@ private fun StatRows(stats: List<OverviewStat>) {
             Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surface)
               .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp)).padding(12.dp)
           ) {
-            Icon(s.icon, null, tint = DeepBlue, modifier = Modifier.size(20.dp))
+            Icon(s.icon, null, tint = BrandPrimary, modifier = Modifier.size(20.dp))
             Spacer(Modifier.height(6.dp))
             Text("${s.value}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
             Text(s.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
@@ -246,7 +246,7 @@ fun AdminMessagesTab(viewModel: CampusViewModel, modifier: Modifier = Modifier) 
         }
       },
       enabled = !busy && title.isNotBlank() && body.isNotBlank() && (audience != "programme" || programmeId != null),
-      shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+      shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
       modifier = Modifier.fillMaxWidth().height(52.dp).testTag("msg_send")
     ) { Icon(Icons.Default.Send, null); Spacer(Modifier.width(8.dp)); Text(viewModel.t("Send", "Tuma"), fontWeight = FontWeight.SemiBold) }
     Spacer(Modifier.height(16.dp))

@@ -109,7 +109,8 @@ import com.willykez.campconnect.ui.screens.ProfileScreen
 import com.willykez.campconnect.ui.screens.SubmissionsScreen
 import com.willykez.campconnect.ui.screens.TimetableScreen
 import com.willykez.campconnect.ui.theme.CampusConnectTheme
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
+import com.willykez.campconnect.ui.theme.identity
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.viewmodel.CampusViewModel
 import com.willykez.campconnect.viewmodel.ScreenTab
@@ -215,11 +216,11 @@ fun CampusMainApp(viewModel: CampusViewModel) {
                 modifier = Modifier
                   .size(34.dp)
                   .clip(RoundedCornerShape(8.dp))
-                  .background(DeepBlue),
+                  .background(BrandPrimary),
                 contentAlignment = Alignment.Center
               ) {
                 Icon(
-                  imageVector = Icons.Default.School,
+                  imageVector = Backend.appKind.identity().icon,
                   contentDescription = "Logo",
                   tint = Color.White,
                   modifier = Modifier.size(20.dp)
@@ -241,7 +242,7 @@ fun CampusMainApp(viewModel: CampusViewModel) {
                         when (currentUser.role) {
                           Role.ADMIN -> Color(0xFFDCFCE7)
                           Role.LECTURER -> WarmAmber.copy(alpha = 0.18f)
-                          Role.STUDENT -> DeepBlue.copy(alpha = 0.12f)
+                          Role.STUDENT -> BrandPrimary.copy(alpha = 0.12f)
                         }
                       )
                       .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -253,16 +254,16 @@ fun CampusMainApp(viewModel: CampusViewModel) {
                       color = when (currentUser.role) {
                         Role.ADMIN -> Color(0xFF166534)
                         Role.LECTURER -> Color(0xFFB45309)
-                        Role.STUDENT -> DeepBlue
+                        Role.STUDENT -> BrandPrimary
                       },
                       fontSize = 9.sp
                     )
                   }
                 }
                 Text(
-                  text = if (isOffline) viewModel.getString("offline_notice") else if (syncing) viewModel.t("Syncing…", "Inasawazisha…") else "${currentUser.fullName.split(" ").firstOrNull() ?: ""} • Tanzania",
+                  text = if (isOffline) viewModel.getString("offline_notice") else if (syncing) viewModel.t("Syncing…", "Inasawazisha…") else "${currentUser.fullName.split(" ").firstOrNull() ?: ""} • ${Backend.appKind.identity().let { viewModel.t(it.roleEn, it.roleSw) }}",
                   style = MaterialTheme.typography.labelSmall,
-                  color = if (isOffline) WarmAmber else if (syncing) DeepBlue else MaterialTheme.colorScheme.onSurfaceVariant
+                  color = if (isOffline) WarmAmber else if (syncing) BrandPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
               }
             }
@@ -282,7 +283,7 @@ fun CampusMainApp(viewModel: CampusViewModel) {
                   }
                 ) {
                   Box(
-                    modifier = Modifier.size(30.dp).clip(CircleShape).background(DeepBlue),
+                    modifier = Modifier.size(30.dp).clip(CircleShape).background(BrandPrimary),
                     contentAlignment = Alignment.Center
                   ) {
                     Text(currentUser.avatarInitials.ifBlank { "?" }, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
@@ -338,7 +339,7 @@ fun CampusMainApp(viewModel: CampusViewModel) {
               BadgedBox(
                 badge = {
                   if (unreadNotifs > 0) {
-                    Badge(containerColor = DeepBlue, contentColor = Color.White) {
+                    Badge(containerColor = BrandPrimary, contentColor = Color.White) {
                       Text("$unreadNotifs")
                     }
                   }
@@ -347,7 +348,7 @@ fun CampusMainApp(viewModel: CampusViewModel) {
                 Icon(
                   imageVector = Icons.Default.Notifications,
                   contentDescription = "Notifications",
-                  tint = if (currentTab == ScreenTab.NOTIFICATIONS) DeepBlue else MaterialTheme.colorScheme.onSurface
+                  tint = if (currentTab == ScreenTab.NOTIFICATIONS) BrandPrimary else MaterialTheme.colorScheme.onSurface
                 )
               }
             }
@@ -371,7 +372,7 @@ fun CampusMainApp(viewModel: CampusViewModel) {
               onClick = { viewModel.setTab(tab) },
               icon = { TabIcon(tab, pendingUsers.size) },
               label = { Text(viewModel.getString(tabLabelKey(tab))) },
-              colors = NavigationBarItemDefaults.colors(indicatorColor = DeepBlue.copy(alpha = 0.15f)),
+              colors = NavigationBarItemDefaults.colors(indicatorColor = BrandPrimary.copy(alpha = 0.15f)),
               modifier = Modifier.testTag("nav_item_${tab.name.lowercase()}")
             )
           }

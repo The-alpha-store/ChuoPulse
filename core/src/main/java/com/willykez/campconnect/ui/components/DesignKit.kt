@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 
 @Composable
 fun ScreenHeading(
@@ -34,9 +34,9 @@ fun ScreenHeading(
 ) {
   Row(modifier = modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
     Box(
-      Modifier.size(48.dp).clip(RoundedCornerShape(15.dp)).background(DeepBlue.copy(alpha = 0.12f)),
+      Modifier.size(48.dp).clip(RoundedCornerShape(15.dp)).background(BrandPrimary.copy(alpha = 0.12f)),
       contentAlignment = Alignment.Center
-    ) { Icon(icon, contentDescription = null, tint = DeepBlue) }
+    ) { Icon(icon, contentDescription = null, tint = BrandPrimary) }
     Spacer(Modifier.width(12.dp))
     Column(Modifier.weight(1f)) {
       Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 1)
@@ -54,9 +54,9 @@ fun EmptyState(icon: ImageVector, title: String, hint: String = "", modifier: Mo
     verticalArrangement = Arrangement.spacedBy(8.dp)
   ) {
     Box(
-      Modifier.size(76.dp).clip(RoundedCornerShape(24.dp)).background(DeepBlue.copy(alpha = 0.08f)),
+      Modifier.size(76.dp).clip(RoundedCornerShape(24.dp)).background(BrandPrimary.copy(alpha = 0.08f)),
       contentAlignment = Alignment.Center
-    ) { Icon(icon, contentDescription = null, tint = DeepBlue, modifier = Modifier.size(34.dp)) }
+    ) { Icon(icon, contentDescription = null, tint = BrandPrimary, modifier = Modifier.size(34.dp)) }
     Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
     if (hint.isNotBlank()) Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
   }

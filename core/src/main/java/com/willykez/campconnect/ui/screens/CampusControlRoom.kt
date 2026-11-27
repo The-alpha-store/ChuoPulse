@@ -82,8 +82,8 @@ import com.willykez.campconnect.data.repository.CampusSummary
 import com.willykez.campconnect.data.repository.WipeScope
 import com.willykez.campconnect.ui.components.ConfirmSheet
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
-import com.willykez.campconnect.ui.theme.DeepBlueDark
+import com.willykez.campconnect.ui.theme.BrandPrimary
+import com.willykez.campconnect.ui.theme.BrandDeep
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.TransparentDialogBars
 import com.willykez.campconnect.ui.theme.WarmAmber
@@ -124,7 +124,7 @@ fun CampusControlRoom(campus: CampusSummary, viewModel: CampusViewModel, onDismi
             modifier = Modifier
               .fillMaxWidth()
               .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
-              .background(Brush.linearGradient(listOf(DeepBlueDark, DeepBlue)))
+              .background(Brush.linearGradient(listOf(BrandDeep, BrandPrimary)))
               .statusBarsPadding()
               .padding(start = 8.dp, end = 16.dp, top = 6.dp, bottom = 16.dp)
           ) {
@@ -152,7 +152,7 @@ fun CampusControlRoom(campus: CampusSummary, viewModel: CampusViewModel, onDismi
 
           ScrollableTabRow(
             selectedTabIndex = tab.ordinal, edgePadding = 12.dp, containerColor = Color.Transparent,
-            contentColor = DeepBlue, divider = {}
+            contentColor = BrandPrimary, divider = {}
           ) {
             RoomTab.values().forEach { t ->
               val label = when (t) {
@@ -350,7 +350,7 @@ private fun StatGrid(stats: List<Stat>) {
             Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surface)
               .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp)).padding(12.dp)
           ) {
-            Icon(s.icon, null, tint = DeepBlue, modifier = Modifier.size(20.dp))
+            Icon(s.icon, null, tint = BrandPrimary, modifier = Modifier.size(20.dp))
             Spacer(Modifier.height(6.dp))
             Text("${s.value}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
             Text(s.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
@@ -379,8 +379,8 @@ internal fun ActionTile(icon: ImageVector, title: String, hint: String, tag: Str
       .clickable(onClick = onClick).padding(14.dp).testTag(tag),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(DeepBlue.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
-      Icon(icon, null, tint = DeepBlue)
+    Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(BrandPrimary.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
+      Icon(icon, null, tint = BrandPrimary)
     }
     Spacer(Modifier.width(12.dp))
     Column(Modifier.weight(1f)) {
@@ -423,7 +423,7 @@ private fun AdminsPanel(campus: CampusSummary, viewModel: CampusViewModel, onAdd
       }
     }
     Button(
-      onClick = onAdd, shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+      onClick = onAdd, shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
       modifier = Modifier.fillMaxWidth().height(52.dp).testTag("add_admin_btn")
     ) { Icon(Icons.Default.PersonAdd, null); Spacer(Modifier.width(8.dp)); Text(viewModel.t("Add a person", "Ongeza mtu"), fontWeight = FontWeight.SemiBold) }
   }
@@ -468,7 +468,7 @@ private fun MessagePanel(campus: CampusSummary, viewModel: CampusViewModel) {
     Button(
       onClick = { scope.launch { busy = true; error = viewModel.sendToCampusAdmins(campus.university.id, title, body, urgent); busy = false; if (error == null) { title = ""; body = ""; urgent = false } } },
       enabled = !busy && title.isNotBlank() && body.isNotBlank(), shape = RoundedCornerShape(14.dp),
-      colors = ButtonDefaults.buttonColors(containerColor = DeepBlue), modifier = Modifier.fillMaxWidth().height(52.dp).testTag("room_msg_send")
+      colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary), modifier = Modifier.fillMaxWidth().height(52.dp).testTag("room_msg_send")
     ) { Icon(Icons.Default.Send, null); Spacer(Modifier.width(8.dp)); Text(viewModel.t("Send", "Tuma"), fontWeight = FontWeight.SemiBold) }
   }
 }

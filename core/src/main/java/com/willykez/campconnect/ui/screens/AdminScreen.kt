@@ -50,7 +50,7 @@ import com.willykez.campconnect.data.model.UserProfile
 import com.willykez.campconnect.ui.components.StatusBadge
 import com.willykez.campconnect.ui.components.ConfirmSheet
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.viewmodel.CampusViewModel
 
@@ -89,7 +89,7 @@ fun AdminScreen(
       selectedTabIndex = tabOrder.indexOf(selectedTab).coerceAtLeast(0),
       edgePadding = 0.dp,
       containerColor = MaterialTheme.colorScheme.surface,
-      contentColor = DeepBlue
+      contentColor = BrandPrimary
     ) {
       tabOrder.forEach { id ->
         val label = when (id) {
@@ -172,13 +172,13 @@ fun AdminScreen(
                       modifier = Modifier
                         .size(36.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(DeepBlue.copy(alpha = 0.15f)),
+                        .background(BrandPrimary.copy(alpha = 0.15f)),
                       contentAlignment = Alignment.Center
                     ) {
                       Text(
                         text = pUser.avatarInitials,
                         fontWeight = FontWeight.Bold,
-                        color = DeepBlue
+                        color = BrandPrimary
                       )
                     }
                     Spacer(modifier = Modifier.width(10.dp))
@@ -199,7 +199,7 @@ fun AdminScreen(
                   StatusBadge(
                     text = "Asked to be: " + pUser.requestedRole.name,
                     backgroundColor = if (pUser.requestedRole == Role.STUDENT) Color(0xFFE0E7FF) else Color(0xFFFEF3C7),
-                    contentColor = if (pUser.requestedRole == Role.STUDENT) DeepBlue else Color(0xFFB45309)
+                    contentColor = if (pUser.requestedRole == Role.STUDENT) BrandPrimary else Color(0xFFB45309)
                   )
                 }
 
@@ -300,8 +300,8 @@ fun AdminScreen(
               ) {
                 StatusBadge(
                   text = log.action,
-                  backgroundColor = DeepBlue.copy(alpha = 0.12f),
-                  contentColor = DeepBlue
+                  backgroundColor = BrandPrimary.copy(alpha = 0.12f),
+                  contentColor = BrandPrimary
                 )
                 Text(
                   text = log.timestamp,
@@ -358,7 +358,7 @@ private fun PendingActions(viewModel: CampusViewModel, pUser: UserProfile) {
           val on = code in teaches
           Surface(
             shape = RoundedCornerShape(16.dp),
-            color = if (on) DeepBlue else MaterialTheme.colorScheme.surfaceVariant,
+            color = if (on) BrandPrimary else MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier
               .clip(RoundedCornerShape(16.dp))
               .clickable { teaches = if (on) teaches - code else teaches + code }
@@ -406,7 +406,7 @@ private fun PendingActions(viewModel: CampusViewModel, pUser: UserProfile) {
       Spacer(modifier = Modifier.height(8.dp))
       Button(
         onClick = { confirm = "lecturer" },
-        colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.fillMaxWidth().testTag("approve_lecturer_btn_${pUser.id}")
       ) { Text("Approve as lecturer") }
     }

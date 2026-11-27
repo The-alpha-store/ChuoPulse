@@ -38,7 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import kotlinx.coroutines.launch
 
 data class PickerItem(
@@ -128,7 +128,7 @@ private fun PickerRow(item: PickerItem, selected: Boolean, onClick: () -> Unit) 
         text = item.title,
         style = MaterialTheme.typography.bodyLarge,
         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-        color = if (selected) DeepBlue else MaterialTheme.colorScheme.onSurface
+        color = if (selected) BrandPrimary else MaterialTheme.colorScheme.onSurface
       )
       val second = item.note ?: item.subtitle
       if (second != null) {
@@ -137,7 +137,7 @@ private fun PickerRow(item: PickerItem, selected: Boolean, onClick: () -> Unit) 
     }
     if (selected) {
       Spacer(modifier = Modifier.width(8.dp))
-      Icon(Icons.Default.Check, contentDescription = "Selected", tint = DeepBlue)
+      Icon(Icons.Default.Check, contentDescription = "Selected", tint = BrandPrimary)
     }
   }
 }

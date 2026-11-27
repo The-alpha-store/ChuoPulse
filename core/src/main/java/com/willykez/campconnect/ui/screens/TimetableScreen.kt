@@ -4,7 +4,7 @@ package com.willykez.campconnect.ui.screens
 import com.willykez.campconnect.ui.components.ScreenHeading
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.graphics.Brush
-import com.willykez.campconnect.ui.theme.PrimaryLightBlue
+import com.willykez.campconnect.ui.theme.BrandLight
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -49,7 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.data.model.SessionStatus
 import com.willykez.campconnect.ui.components.SessionCard
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.ui.theme.WarmAmberLight
 import com.willykez.campconnect.viewmodel.CampusViewModel
@@ -117,14 +117,14 @@ fun TimetableScreen(
         var showAdd by remember { mutableStateOf(false) }
         if (viewModel.schedulableCourses().isNotEmpty()) {
           IconButton(onClick = { showAdd = true }, modifier = Modifier.size(52.dp).testTag("add_session_btn")) {
-            Icon(Icons.Default.Add, contentDescription = viewModel.t("Add a class", "Ongeza kipindi"), tint = DeepBlue, modifier = Modifier.size(28.dp))
+            Icon(Icons.Default.Add, contentDescription = viewModel.t("Add a class", "Ongeza kipindi"), tint = BrandPrimary, modifier = Modifier.size(28.dp))
           }
         }
         if (showAdd) AddSessionSheet(viewModel = viewModel, initialDay = selectedDay, onDismiss = { showAdd = false })
 
         Surface(
           shape = RoundedCornerShape(14.dp),
-          color = if (isWeekView) DeepBlue else MaterialTheme.colorScheme.surfaceVariant,
+          color = if (isWeekView) BrandPrimary else MaterialTheme.colorScheme.surfaceVariant,
           modifier = Modifier
             .clip(RoundedCornerShape(14.dp))
             .clickable { viewModel.toggleWeekView() }
@@ -170,14 +170,14 @@ fun TimetableScreen(
               .weight(1f)
               .clip(RoundedCornerShape(18.dp))
               .background(
-                if (isSelected) Brush.verticalGradient(listOf(PrimaryLightBlue, DeepBlue))
+                if (isSelected) Brush.verticalGradient(listOf(BrandLight, BrandPrimary))
                 else Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface))
               )
               .border(
                 width = if (isToday && !isSelected) 1.5.dp else 1.dp,
                 color = when {
-                  isSelected -> DeepBlue
-                  isToday -> DeepBlue
+                  isSelected -> BrandPrimary
+                  isToday -> BrandPrimary
                   else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 },
                 shape = RoundedCornerShape(18.dp)
@@ -227,13 +227,13 @@ fun TimetableScreen(
       ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
           Box(
-            modifier = Modifier.size(84.dp).clip(RoundedCornerShape(28.dp)).background(DeepBlue.copy(alpha = 0.08f)),
+            modifier = Modifier.size(84.dp).clip(RoundedCornerShape(28.dp)).background(BrandPrimary.copy(alpha = 0.08f)),
             contentAlignment = Alignment.Center
           ) {
             Icon(
               imageVector = Icons.Default.CalendarToday,
               contentDescription = "No classes",
-              tint = DeepBlue,
+              tint = BrandPrimary,
               modifier = Modifier.size(38.dp)
             )
           }
@@ -313,14 +313,14 @@ private fun DayHeader(
         modifier = Modifier
           .size(width = 4.dp, height = 22.dp)
           .clip(RoundedCornerShape(2.dp))
-          .background(if (isToday) DeepBlue else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+          .background(if (isToday) BrandPrimary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
       )
       Spacer(modifier = Modifier.width(10.dp))
       Text(
         text = name,
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
-        color = if (isToday) DeepBlue else MaterialTheme.colorScheme.onSurface
+        color = if (isToday) BrandPrimary else MaterialTheme.colorScheme.onSurface
       )
       if (isToday) {
         Spacer(modifier = Modifier.width(8.dp))
@@ -331,7 +331,7 @@ private fun DayHeader(
           color = Color.White,
           modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(DeepBlue)
+            .background(BrandPrimary)
             .padding(horizontal = 8.dp, vertical = 2.dp)
         )
       }

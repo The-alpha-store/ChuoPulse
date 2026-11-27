@@ -2,10 +2,7 @@ package com.willykez.campconnect.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val DeepBlue = Color(0xFF1F4FD8)
-val DeepBlueDark = Color(0xFF123499)
-val PrimaryLightBlue = Color(0xFF3B6DF6)
-val PrimaryDark = Color(0xFF8FA8FF)
+// Brand colours (BrandPrimary / BrandDeep / BrandLight) live in Brand.kt: each app has its own palette.
 
 val WarmAmber = Color(0xFFF59E0B)
 val WarmAmberLight = Color(0xFFFEF3C7)

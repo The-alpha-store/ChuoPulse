@@ -60,7 +60,7 @@ import com.willykez.campconnect.data.model.Role
 import com.willykez.campconnect.data.model.StudentSubmission
 import com.willykez.campconnect.ui.components.StatusBadge
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.SuccessGreenLight
 import com.willykez.campconnect.ui.theme.WarmAmber
@@ -122,7 +122,7 @@ fun SubmissionsScreen(
     Spacer(modifier = Modifier.height(12.dp))
 
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      StatTile("Total", inCourse.size.toString(), DeepBlue, Modifier.weight(1f))
+      StatTile("Total", inCourse.size.toString(), BrandPrimary, Modifier.weight(1f))
       StatTile(waitingLabel, inCourse.count { it.grade.isNullOrBlank() }.toString(), WarmAmberDark, Modifier.weight(1f))
       StatTile("Graded", inCourse.count { !it.grade.isNullOrBlank() }.toString(), SuccessGreen, Modifier.weight(1f))
       StatTile("Late", inCourse.count { it.isLate }.toString(), DangerRed, Modifier.weight(1f))
@@ -216,10 +216,10 @@ private fun ChipRow(options: List<Pair<String, String>>, selected: String, tagPr
       val isSelected = selected == value
       Surface(
         shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) DeepBlue else MaterialTheme.colorScheme.surface,
+        color = if (isSelected) BrandPrimary else MaterialTheme.colorScheme.surface,
         border = androidx.compose.foundation.BorderStroke(
           width = 1.dp,
-          color = if (isSelected) DeepBlue else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+          color = if (isSelected) BrandPrimary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         ),
         modifier = Modifier
           .clip(RoundedCornerShape(16.dp))
@@ -287,7 +287,7 @@ fun SubmissionCard(
           Box(
             modifier = Modifier
               .clip(RoundedCornerShape(6.dp))
-              .background(DeepBlue)
+              .background(BrandPrimary)
               .padding(horizontal = 6.dp, vertical = 2.dp)
           ) {
             Text(
@@ -441,7 +441,7 @@ fun SubmissionCard(
             label = if (isGraded) "Update grade" else "Grade submission",
             icon = Icons.Default.Grade,
             onClick = onGradeClick,
-            color = if (isGraded) DeepBlue else WarmAmber,
+            color = if (isGraded) BrandPrimary else WarmAmber,
             filled = !isGraded,
             tag = "grade_btn_${submission.id}"
           )

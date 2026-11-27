@@ -36,7 +36,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.util.formatClock
 import com.willykez.campconnect.viewmodel.CampusViewModel
 
@@ -87,7 +87,7 @@ fun AddSessionSheet(viewModel: CampusViewModel, initialDay: Int, onDismiss: () -
         },
         enabled = course != null && lecturerId != null && room.isNotBlank(),
         shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.weight(1f).height(52.dp).testTag("session_save_btn")
       ) { Text(viewModel.t("Add to timetable", "Ongeza kwenye ratiba"), fontWeight = FontWeight.SemiBold) }
     }
@@ -133,7 +133,7 @@ fun AddSessionSheet(viewModel: CampusViewModel, initialDay: Int, onDismiss: () -
           modifier = Modifier
             .weight(1f)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (selected) DeepBlue else MaterialTheme.colorScheme.surfaceVariant)
+            .background(if (selected) BrandPrimary else MaterialTheme.colorScheme.surfaceVariant)
             .clickable { day = n }
             .padding(vertical = 10.dp)
             .testTag("session_day_$label"),

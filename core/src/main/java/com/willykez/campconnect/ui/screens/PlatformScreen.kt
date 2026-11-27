@@ -22,7 +22,7 @@ import com.willykez.campconnect.ui.theme.DangerRedLight
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.SuccessGreenLight
 import com.willykez.campconnect.ui.theme.WarmAmber
-import com.willykez.campconnect.ui.theme.DeepBlueDark
+import com.willykez.campconnect.ui.theme.BrandDeep
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,7 +70,7 @@ import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.data.repository.CampusSummary
 import com.willykez.campconnect.ui.components.AppBottomSheet
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.viewmodel.CampusViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,7 +114,7 @@ fun PlatformScreen(viewModel: CampusViewModel) {
         modifier = Modifier
           .fillMaxWidth()
           .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
-          .background(Brush.linearGradient(listOf(DeepBlueDark, DeepBlue)))
+          .background(Brush.linearGradient(listOf(BrandDeep, BrandPrimary)))
           .statusBarsPadding()
           .padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 20.dp)
       ) {
@@ -157,7 +157,7 @@ fun PlatformScreen(viewModel: CampusViewModel) {
       TabRow(
         selectedTabIndex = tab,
         containerColor = Color.Transparent,
-        contentColor = DeepBlue,
+        contentColor = BrandPrimary,
         divider = {}
       ) {
         Tab(selected = tab == 0, onClick = { tab = 0 }, modifier = Modifier.testTag("platform_tab_campuses"), text = {
@@ -220,7 +220,7 @@ fun PlatformScreen(viewModel: CampusViewModel) {
         Button(
           onClick = { creating = true },
           shape = RoundedCornerShape(14.dp),
-          colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+          colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
           modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(52.dp).testTag("platform_new_campus_btn")
         ) {
           Icon(Icons.Default.Add, contentDescription = null)
@@ -250,7 +250,7 @@ fun PlatformScreen(viewModel: CampusViewModel) {
             ) {
               Column(modifier = Modifier.padding(12.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                  Text(log.action.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = DeepBlue)
+                  Text(log.action.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = BrandPrimary)
                   Text(log.timestamp, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -318,9 +318,9 @@ private fun CampusCard(
     Column(modifier = Modifier.padding(16.dp)) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
-          modifier = Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(DeepBlue.copy(alpha = 0.10f)),
+          modifier = Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(BrandPrimary.copy(alpha = 0.10f)),
           contentAlignment = Alignment.Center
-        ) { Text(u.shortName.take(4), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = DeepBlue) }
+        ) { Text(u.shortName.take(4), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = BrandPrimary) }
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
           Text(u.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
@@ -414,7 +414,7 @@ private fun CreateCampusSheet(viewModel: CampusViewModel, onDismiss: () -> Unit)
         },
         enabled = !busy && listOf(code, name, adminName, adminEmail, adminNumber, adminPassword).all { it.isNotBlank() },
         shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.weight(1f).height(52.dp).testTag("campus_create_btn")
       ) { Text(if (busy) viewModel.t("Creating...", "Inaunda...") else viewModel.t("Create campus", "Unda chuo"), fontWeight = FontWeight.SemiBold) }
     }

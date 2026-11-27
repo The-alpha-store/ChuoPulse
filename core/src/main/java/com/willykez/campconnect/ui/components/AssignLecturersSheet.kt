@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.data.model.UserProfile
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +113,7 @@ fun AssignLecturersSheet(
           Text(
             t("${selected.size} selected", "Waliochaguliwa: ${selected.size}"),
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected.isEmpty()) DangerRed else DeepBlue
+            color = if (selected.isEmpty()) DangerRed else BrandPrimary
           )
         }
         if (selected.isEmpty()) {

@@ -67,7 +67,7 @@ import com.willykez.campconnect.data.model.UserProfile
 import com.willykez.campconnect.data.repository.AudienceOption
 import com.willykez.campconnect.ui.theme.DangerRed
 import com.willykez.campconnect.ui.theme.DangerRedLight
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.ui.theme.WarmAmberLight
@@ -100,8 +100,8 @@ fun AnnouncementDetailDialog(
       Row(verticalAlignment = Alignment.CenterVertically) {
         StatusBadge(
           text = announcement.audienceName,
-          backgroundColor = DeepBlue.copy(alpha = 0.12f),
-          contentColor = DeepBlue
+          backgroundColor = BrandPrimary.copy(alpha = 0.12f),
+          contentColor = BrandPrimary
         )
 
         if (announcement.isRetracted) {
@@ -180,7 +180,7 @@ fun AnnouncementDetailDialog(
             Icon(
               imageVector = Icons.Default.Attachment,
               contentDescription = "Attachment",
-              tint = DeepBlue
+              tint = BrandPrimary
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
@@ -199,7 +199,7 @@ fun AnnouncementDetailDialog(
 
           Button(
             onClick = { onPreviewAttachment(announcement.attachment) },
-            colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+            colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
             modifier = Modifier.testTag("btn_view_attached_doc")
           ) {
             Icon(imageVector = Icons.Default.Visibility, contentDescription = "Preview", modifier = Modifier.size(16.dp))
@@ -293,7 +293,7 @@ fun AnnouncementDetailDialog(
             }
           }
           IconButton(onClick = onEditClick, modifier = Modifier.testTag("edit_announcement_btn")) {
-            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = DeepBlue)
+            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = BrandPrimary)
           }
           IconButton(onClick = onDeleteClick, modifier = Modifier.testTag("delete_announcement_btn")) {
             Icon(Icons.Default.Delete, contentDescription = "Delete", tint = DangerRed)
@@ -549,7 +549,7 @@ fun AudienceChip(
 ) {
   Surface(
     shape = RoundedCornerShape(16.dp),
-    color = if (isSelected) DeepBlue else MaterialTheme.colorScheme.surfaceVariant,
+    color = if (isSelected) BrandPrimary else MaterialTheme.colorScheme.surfaceVariant,
     modifier = Modifier
       .clip(RoundedCornerShape(16.dp))
       .clickable { onClick() }
@@ -602,7 +602,7 @@ fun ChangeVenueDialog(
       text = "${session.courseCode}: ${session.courseTitle}",
       style = MaterialTheme.typography.titleSmall,
       fontWeight = FontWeight.Bold,
-      color = DeepBlue
+      color = BrandPrimary
     )
     Text(
       text = "Current Venue: ${session.venue}",

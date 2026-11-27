@@ -63,7 +63,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,7 +176,7 @@ fun RowScope.SheetButtons(
   onConfirm: () -> Unit,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
-  confirmColor: Color = DeepBlue,
+  confirmColor: Color = BrandPrimary,
   confirmIcon: ImageVector? = null,
   confirmTag: String? = null
 ) {
@@ -230,7 +230,7 @@ fun ConfirmSheet(
         onDismiss = onDismiss,
         confirmLabel = confirmLabel,
         onConfirm = onConfirm,
-        confirmColor = if (destructive) DangerRed else DeepBlue,
+        confirmColor = if (destructive) DangerRed else BrandPrimary,
         confirmIcon = confirmIcon,
         confirmTag = confirmTag,
         enabled = confirmEnabled

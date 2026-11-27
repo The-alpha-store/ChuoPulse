@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.ui.components.AppBottomSheet
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.viewmodel.CampusViewModel
 import kotlinx.coroutines.launch
 
@@ -80,7 +80,7 @@ private fun ChangePasswordSheet(viewModel: CampusViewModel, onDismiss: () -> Uni
         },
         enabled = !busy && current.isNotBlank() && next.isNotBlank() && repeat.isNotBlank(),
         shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.weight(1f).height(56.dp).testTag("change_password_save")
       ) { Text(viewModel.t("Save password", "Hifadhi nenosiri"), fontWeight = FontWeight.SemiBold) }
     }

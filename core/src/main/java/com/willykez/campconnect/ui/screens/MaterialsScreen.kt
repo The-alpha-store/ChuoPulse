@@ -64,7 +64,7 @@ import com.willykez.campconnect.data.model.Role
 import com.willykez.campconnect.ui.components.StatusBadge
 import com.willykez.campconnect.ui.theme.DangerRed
 import com.willykez.campconnect.ui.theme.DangerRedLight
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.SuccessGreenLight
 import com.willykez.campconnect.ui.theme.WarmAmber
@@ -191,13 +191,13 @@ fun MaterialsScreen(
                   modifier = Modifier
                     .size(46.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(if (mat.isDownloaded) SuccessGreenLight else DeepBlue.copy(alpha = 0.12f)),
+                    .background(if (mat.isDownloaded) SuccessGreenLight else BrandPrimary.copy(alpha = 0.12f)),
                   contentAlignment = Alignment.Center
                 ) {
                   Icon(
                     imageVector = if (mat.isDownloaded) Icons.Default.FileDownloadDone else Icons.Default.PictureAsPdf,
                     contentDescription = "File",
-                    tint = if (mat.isDownloaded) SuccessGreen else DeepBlue,
+                    tint = if (mat.isDownloaded) SuccessGreen else BrandPrimary,
                     modifier = Modifier.size(24.dp)
                   )
                 }
@@ -210,7 +210,7 @@ fun MaterialsScreen(
                       text = mat.courseCode,
                       style = MaterialTheme.typography.labelSmall,
                       fontWeight = FontWeight.Bold,
-                      color = DeepBlue
+                      color = BrandPrimary
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
@@ -280,7 +280,7 @@ fun MaterialsScreen(
                   label = if (mat.isDownloaded) viewModel.t("Saved", "Imehifadhiwa") else viewModel.t("Save", "Hifadhi"),
                   icon = if (mat.isDownloaded) Icons.Default.CheckCircle else Icons.Default.Download,
                   onClick = { viewModel.toggleMaterialDownloaded(mat.id) },
-                  color = if (mat.isDownloaded) SuccessGreen else DeepBlue,
+                  color = if (mat.isDownloaded) SuccessGreen else BrandPrimary,
                   modifier = Modifier.weight(1f),
                   tag = "download_toggle_${mat.id}"
                 )
@@ -321,7 +321,7 @@ fun MaterialsScreen(
     if (user.role == Role.LECTURER || user.role == Role.ADMIN || (user.role == Role.STUDENT && user.isClassRep)) {
       FloatingActionButton(
         onClick = onOpenUploadDialog,
-        containerColor = DeepBlue,
+        containerColor = BrandPrimary,
         contentColor = Color.White,
         modifier = Modifier
           .align(Alignment.BottomEnd)
@@ -351,29 +351,29 @@ private fun SubjectHeader(
     modifier = modifier
       .fillMaxWidth()
       .clip(RoundedCornerShape(14.dp))
-      .background(DeepBlue.copy(alpha = 0.07f))
-      .border(1.dp, DeepBlue.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+      .background(BrandPrimary.copy(alpha = 0.07f))
+      .border(1.dp, BrandPrimary.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
       .clickable { onToggle() }
       .padding(horizontal = 12.dp, vertical = 10.dp)
       .testTag("subject_header_$code"),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Box(
-      modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(DeepBlue),
+      modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(BrandPrimary),
       contentAlignment = Alignment.Center
     ) {
       Text(code.take(4), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = androidx.compose.ui.graphics.Color.White, maxLines = 1)
     }
     Column(modifier = Modifier.weight(1f).padding(horizontal = 10.dp)) {
-      Text(code, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = DeepBlue)
+      Text(code, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = BrandPrimary)
       Text(title, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
     }
-    Surface(shape = RoundedCornerShape(50), color = DeepBlue.copy(alpha = 0.14f)) {
+    Surface(shape = RoundedCornerShape(50), color = BrandPrimary.copy(alpha = 0.14f)) {
       Text(
         "$count",
         style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.Bold,
-        color = DeepBlue,
+        color = BrandPrimary,
         modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
       )
     }

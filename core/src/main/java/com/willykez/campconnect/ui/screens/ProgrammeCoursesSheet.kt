@@ -28,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.ui.components.AppBottomSheet
 import com.willykez.campconnect.ui.components.SheetButtons
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.viewmodel.CampusViewModel
 
@@ -106,7 +106,7 @@ fun ProgrammeCoursesSheet(
         Spacer(Modifier.width(4.dp))
         Column(Modifier.weight(1f)) {
           Row {
-            Text(code, fontWeight = FontWeight.Bold, color = DeepBlue)
+            Text(code, fontWeight = FontWeight.Bold, color = BrandPrimary)
             Spacer(Modifier.width(8.dp))
             Text(title, maxLines = 1, modifier = Modifier.weight(1f))
           }

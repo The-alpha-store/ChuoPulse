@@ -1,6 +1,6 @@
 package com.willykez.campconnect.ui.screens
 
-import com.willykez.campconnect.ui.theme.DeepBlueDark
+import com.willykez.campconnect.ui.theme.BrandDeep
 import com.willykez.campconnect.ui.components.EmptyState
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.Brush
@@ -55,7 +55,7 @@ import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.data.model.NotificationItem
 import com.willykez.campconnect.data.model.NotificationType
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.viewmodel.CampusViewModel
@@ -95,7 +95,7 @@ fun NotificationsScreen(
       modifier = Modifier
         .fillMaxWidth()
         .clip(RoundedCornerShape(24.dp))
-        .background(Brush.linearGradient(listOf(DeepBlueDark, DeepBlue)))
+        .background(Brush.linearGradient(listOf(BrandDeep, BrandPrimary)))
         .padding(18.dp)
         .testTag("notifications_hero")
     ) {
@@ -160,7 +160,7 @@ fun NotificationsScreen(
     } else {
       LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (fresh.isNotEmpty()) {
-          item { NotifSectionLabel(viewModel.t("New", "Mpya"), fresh.size, DeepBlue) }
+          item { NotifSectionLabel(viewModel.t("New", "Mpya"), fresh.size, BrandPrimary) }
           items(fresh, key = { it.id }) { notif -> Box(Modifier.animateItem()) { NotificationCard(item = notif) } }
         }
         if (earlier.isNotEmpty()) {
@@ -189,10 +189,10 @@ fun NotificationCard(item: NotificationItem) {
   val label: String
   when (item.type) {
     NotificationType.TIMETABLE_CHANGE -> { icon = Icons.Default.EditCalendar; tint = WarmAmber; label = "Schedule" }
-    NotificationType.ANNOUNCEMENT -> { icon = Icons.Default.Campaign; tint = DeepBlue; label = "Notice" }
+    NotificationType.ANNOUNCEMENT -> { icon = Icons.Default.Campaign; tint = BrandPrimary; label = "Notice" }
     NotificationType.DEADLINE_ALERT -> { icon = Icons.Default.CalendarMonth; tint = DangerRed; label = "Deadline" }
     NotificationType.APPROVAL -> { icon = Icons.Default.VerifiedUser; tint = SuccessGreen; label = "Account" }
-    NotificationType.SUBMISSION_RECEIVED -> { icon = Icons.Default.Assignment; tint = DeepBlue; label = "Submission" }
+    NotificationType.SUBMISSION_RECEIVED -> { icon = Icons.Default.Assignment; tint = BrandPrimary; label = "Submission" }
     NotificationType.GRADE_POSTED -> { icon = Icons.Default.Grade; tint = SuccessGreen; label = "Grade" }
   }
   val shape = RoundedCornerShape(18.dp)

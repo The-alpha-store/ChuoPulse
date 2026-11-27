@@ -4,7 +4,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.ui.graphics.Brush
-import com.willykez.campconnect.ui.theme.DeepBlueDark
+import com.willykez.campconnect.ui.theme.BrandDeep
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.RepeatMode
@@ -96,7 +96,8 @@ import com.willykez.campconnect.ui.components.PickerField
 import com.willykez.campconnect.ui.components.PickerItem
 import com.willykez.campconnect.ui.components.PickerSheet
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
+import com.willykez.campconnect.ui.theme.identity
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.viewmodel.CampusViewModel
@@ -104,6 +105,22 @@ import com.willykez.campconnect.viewmodel.CampusViewModel
 private enum class AuthPage { SIGN_IN, SIGN_UP, CODE, FORGOT, RESET, MFA }
 
 private val FieldShape = RoundedCornerShape(14.dp)
+
+/** Picks the wording for the running app, so each app's screens say what is true for that kind of account. */
+private fun CampusViewModel.forApp(
+  owner: Pair<String, String>,
+  admin: Pair<String, String>,
+  lecturer: Pair<String, String>,
+  student: Pair<String, String>
+): String {
+  val p = when (Backend.appKind) {
+    com.willykez.campconnect.data.model.AppKind.OWNER -> owner
+    com.willykez.campconnect.data.model.AppKind.ADMIN -> admin
+    com.willykez.campconnect.data.model.AppKind.LECTURER -> lecturer
+    com.willykez.campconnect.data.model.AppKind.STUDENT -> student
+  }
+  return t(p.first, p.second)
+}
 
 @Composable
 fun AuthGate(viewModel: CampusViewModel) {
@@ -171,7 +188,7 @@ fun AuthGate(viewModel: CampusViewModel) {
   Column(
     modifier = Modifier
       .fillMaxSize()
-      .background(Brush.verticalGradient(listOf(DeepBlueDark, DeepBlue, MaterialTheme.colorScheme.background)))
+      .background(Brush.verticalGradient(listOf(BrandDeep, BrandPrimary, MaterialTheme.colorScheme.background)))
       .systemBarsPadding()
       .imePadding()
       .verticalScroll(rememberScrollState())
@@ -206,7 +223,7 @@ fun AuthGate(viewModel: CampusViewModel) {
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
     if (busy) {
       androidx.compose.material3.LinearProgressIndicator(
-        color = DeepBlue,
+        color = BrandPrimary,
         modifier = Modifier.fillMaxWidth().height(3.dp).testTag("auth_busy")
       )
       Spacer(modifier = Modifier.height(12.dp))
@@ -327,8 +344,13 @@ private fun SignInPage(
 
   AuthField(
     value = email, onChange = { email = it }, tag = "auth_email",
-    label = viewModel.t("Registration number or email", "Namba ya usajili au barua pepe"),
-    icon = Icons.Default.Badge
+    label = viewModel.forApp(
+      owner = "Owner email" to "Barua pepe ya mmiliki",
+      admin = "Administrator email" to "Barua pepe ya msimamizi",
+      lecturer = "Staff email" to "Barua pepe ya mfanyakazi",
+      student = "Email" to "Barua pepe"
+    ),
+    icon = Icons.Default.Email, keyboard = KeyboardType.Email
   )
   Spacer(modifier = Modifier.height(12.dp))
   AuthField(
@@ -379,10 +401,19 @@ private fun SignUpPage(
   val chosenProgramme = if (programmes.isNotEmpty()) programme.takeIf { it in programmes } ?: "" else programme
 
   PageTitle(
-    viewModel.t("Create your account", "Fungua akaunti yako"),
-    viewModel.t(
-      "Your university's registry approves every account before you can see anything.",
-      "Msajili wa chuo chako huidhinisha kila akaunti kabla hujaona chochote."
+    viewModel.forApp(
+      owner = "Create your account" to "Fungua akaunti yako",
+      admin = "Create your account" to "Fungua akaunti yako",
+      lecturer = "Create your lecturer account" to "Fungua akaunti yako ya mhadhiri",
+      student = "Create your student account" to "Fungua akaunti yako ya mwanafunzi"
+    ),
+    viewModel.forApp(
+      owner = "Owner accounts are created by the platform team." to "Akaunti za mmiliki hufunguliwa na timu ya jukwaa.",
+      admin = "Administrator accounts are created for you." to "Akaunti za wasimamizi hufunguliwa kwa ajili yako.",
+      lecturer = "Your university's administrator approves every lecturer account before you can see anything." to
+        "Msimamizi wa chuo chako huidhinisha kila akaunti ya mhadhiri kabla hujaona chochote.",
+      student = "Your university's registry approves every account before you can see anything." to
+        "Msajili wa chuo chako huidhinisha kila akaunti kabla hujaona chochote."
     )
   )
 
@@ -538,13 +569,25 @@ private fun ForgotPage(viewModel: CampusViewModel, onSubmit: (String) -> Unit) {
 
   PageTitle(
     viewModel.t("Forgot password", "Umesahau nenosiri"),
-    viewModel.t(
-      "Enter your university email. If it has an account, we send a code.",
-      "Andika barua pepe yako ya chuo. Ikiwa ina akaunti, tutatuma msimbo."
+    viewModel.forApp(
+      owner = "Enter the email of your owner account. If it has an account, we send a code." to
+        "Andika barua pepe ya akaunti yako ya mmiliki. Ikiwa ina akaunti, tutatuma msimbo.",
+      admin = "Enter the email of your administrator account. If it has an account, we send a code." to
+        "Andika barua pepe ya akaunti yako ya msimamizi. Ikiwa ina akaunti, tutatuma msimbo.",
+      lecturer = "Enter the email you registered with. If it has an account, we send a code." to
+        "Andika barua pepe uliyojisajilia nayo. Ikiwa ina akaunti, tutatuma msimbo.",
+      student = "Enter the email you registered with. If it has an account, we send a code." to
+        "Andika barua pepe uliyojisajilia nayo. Ikiwa ina akaunti, tutatuma msimbo."
     )
   )
   AuthField(
-    email, { email = it }, viewModel.t("University email", "Barua pepe ya chuo"), "auth_forgot_email",
+    email, { email = it },
+    viewModel.forApp(
+      owner = "Owner email" to "Barua pepe ya mmiliki",
+      admin = "Administrator email" to "Barua pepe ya msimamizi",
+      lecturer = "Staff email" to "Barua pepe ya mfanyakazi",
+      student = "Email" to "Barua pepe"
+    ), "auth_forgot_email",
     icon = Icons.Default.Email, keyboard = KeyboardType.Email,
     imeAction = ImeAction.Done, onDone = { if (email.isNotBlank()) onSubmit(email) }
   )
@@ -650,11 +693,20 @@ fun WaitingRoomScreen(viewModel: CampusViewModel) {
     Spacer(modifier = Modifier.height(10.dp))
     Text(
       text = if (notActive) {
-        viewModel.t("Please contact the Academic Registry.", "Tafadhali wasiliana na Msajili wa Taaluma.")
+        viewModel.forApp(
+          owner = "Please contact the ChuoPulse team." to "Tafadhali wasiliana na timu ya ChuoPulse.",
+          admin = "Please contact the ChuoPulse team." to "Tafadhali wasiliana na timu ya ChuoPulse.",
+          lecturer = "Please contact your campus administrator." to "Tafadhali wasiliana na msimamizi wa chuo chako.",
+          student = "Please contact the Academic Registry." to "Tafadhali wasiliana na Msajili wa Taaluma."
+        )
       } else {
-        viewModel.t(
-          "The Academic Registry checks every new account. You will get a notification as soon as you are approved.",
-          "Msajili wa Taaluma hukagua kila akaunti mpya. Utapata arifa mara tu utakapoidhinishwa."
+        viewModel.forApp(
+          owner = "Your account is waiting for approval." to "Akaunti yako inasubiri idhini.",
+          admin = "Your account is waiting for approval." to "Akaunti yako inasubiri idhini.",
+          lecturer = "Your campus administrator checks every new lecturer account. You will get a notification as soon as you are approved." to
+            "Msimamizi wa chuo chako hukagua kila akaunti mpya ya mhadhiri. Utapata arifa mara tu utakapoidhinishwa.",
+          student = "The Academic Registry checks every new account. You will get a notification as soon as you are approved." to
+            "Msajili wa Taaluma hukagua kila akaunti mpya. Utapata arifa mara tu utakapoidhinishwa."
         )
       },
       style = MaterialTheme.typography.bodyMedium,
@@ -708,7 +760,7 @@ private fun AuthHeader(viewModel: CampusViewModel, compact: Boolean = false) {
       modifier = Modifier.size(if (compact) 44.dp else 68.dp).clip(RoundedCornerShape(if (compact) 14.dp else 22.dp)).background(Color.White),
       contentAlignment = Alignment.Center
     ) {
-      Icon(Icons.Default.School, contentDescription = "ChuoPulse", tint = DeepBlue, modifier = Modifier.size(if (compact) 26.dp else 38.dp))
+      Icon(Backend.appKind.identity().icon, contentDescription = "ChuoPulse", tint = BrandPrimary, modifier = Modifier.size(if (compact) 26.dp else 38.dp))
     }
     Spacer(modifier = Modifier.height(if (compact) 8.dp else 14.dp))
     Text(
@@ -717,13 +769,21 @@ private fun AuthHeader(viewModel: CampusViewModel, compact: Boolean = false) {
       fontWeight = FontWeight.Bold,
       color = Color.White
     )
-    if (!compact) {
-      Spacer(modifier = Modifier.height(4.dp))
+    val identity = Backend.appKind.identity()
+    Spacer(modifier = Modifier.height(6.dp))
+    Surface(shape = RoundedCornerShape(50), color = Color.White.copy(alpha = 0.18f)) {
       Text(
-        text = viewModel.t(
-          "Your timetable, notices and deadlines in one place.",
-          "Ratiba, matangazo na tarehe za mwisho mahali pamoja."
-        ),
+        text = viewModel.t(identity.roleEn, identity.roleSw).uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = Color.White,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp).testTag("auth_role_chip")
+      )
+    }
+    if (!compact) {
+      Spacer(modifier = Modifier.height(8.dp))
+      Text(
+        text = viewModel.t(identity.taglineEn, identity.taglineSw),
         style = MaterialTheme.typography.bodyMedium,
         color = Color.White.copy(alpha = 0.85f),
         textAlign = TextAlign.Center
@@ -737,7 +797,7 @@ private fun AuthTab(label: String, selected: Boolean, tag: String, modifier: Mod
   Box(
     modifier = modifier
       .clip(RoundedCornerShape(11.dp))
-      .background(if (selected) DeepBlue else Color.Transparent)
+      .background(if (selected) BrandPrimary else Color.Transparent)
       .clickable { onClick() }
       .padding(vertical = 11.dp)
       .testTag(tag),
@@ -766,7 +826,7 @@ private fun PrimaryAction(text: String, enabled: Boolean, tag: String, onClick: 
     onClick = onClick,
     enabled = enabled,
     shape = FieldShape,
-    colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
     modifier = Modifier.fillMaxWidth().height(56.dp).testTag(tag)
   ) { Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
 }
@@ -793,7 +853,7 @@ private fun LanguageOption(label: String, selected: Boolean, tag: String, onClic
   Box(
     modifier = Modifier
       .clip(RoundedCornerShape(17.dp))
-      .background(if (selected) DeepBlue else Color.Transparent)
+      .background(if (selected) BrandPrimary else Color.Transparent)
       .clickable { onClick() }
       .padding(horizontal = 14.dp, vertical = 6.dp)
       .testTag(tag),
@@ -950,8 +1010,8 @@ private fun MfaPage(
   PageTitle(
     if (enrolling) viewModel.t("Set up your second step", "Weka hatua ya pili") else viewModel.t("Second step", "Hatua ya pili"),
     if (enrolling) viewModel.t(
-      "Administrators confirm every sign-in with an authenticator app. Add the key below to Google Authenticator, Aegis or a similar app, then enter the six digits it shows.",
-      "Wasimamizi huthibitisha kila kuingia kwa programu ya uthibitisho. Weka ufunguo ulio hapa chini kwenye Google Authenticator, Aegis au kama hiyo, kisha andika tarakimu sita inazoonyesha."
+      "ChuoPulse confirms every administrator and owner sign-in with an authenticator app. Add the key below to Google Authenticator, Aegis or a similar app, then enter the six digits it shows.",
+      "ChuoPulse huthibitisha kila kuingia kwa msimamizi na mmiliki kwa programu ya uthibitisho. Weka ufunguo ulio hapa chini kwenye Google Authenticator, Aegis au kama hiyo, kisha andika tarakimu sita inazoonyesha."
     ) else viewModel.t(
       "Open your authenticator app and enter the six digits shown for ChuoPulse.",
       "Fungua programu yako ya uthibitisho na uandike tarakimu sita zilizoonyeshwa kwa ChuoPulse."

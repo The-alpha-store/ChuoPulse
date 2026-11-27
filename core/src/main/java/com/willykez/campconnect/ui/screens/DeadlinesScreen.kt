@@ -35,7 +35,7 @@ import com.willykez.campconnect.data.model.AttachmentFile
 import com.willykez.campconnect.data.model.DeadlineItem
 import com.willykez.campconnect.data.model.Role
 import com.willykez.campconnect.ui.components.DeadlineCard
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.viewmodel.CampusViewModel
 import com.willykez.campconnect.viewmodel.ScreenTab
 
@@ -167,7 +167,7 @@ fun DeadlinesScreen(
     if (user.role == Role.LECTURER || user.role == Role.ADMIN || (user.role == Role.STUDENT && user.isClassRep)) {
       FloatingActionButton(
         onClick = onOpenAddDeadlineDialog,
-        containerColor = DeepBlue,
+        containerColor = BrandPrimary,
         contentColor = Color.White,
         modifier = Modifier
           .align(Alignment.BottomEnd)

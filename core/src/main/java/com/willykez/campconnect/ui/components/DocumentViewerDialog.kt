@@ -101,7 +101,7 @@ import com.willykez.campconnect.data.docs.DocumentTextExtractor
 import com.willykez.campconnect.data.docs.ExtractedDocument
 import com.willykez.campconnect.data.docs.ExtractionException
 import com.willykez.campconnect.data.model.AttachmentFile
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -297,7 +297,7 @@ fun DocumentViewerDialog(
             )
             Button(
               onClick = onDismiss,
-              colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+              colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
               modifier = Modifier
                 .height(36.dp)
                 .testTag("btn_close_document_viewer")
@@ -552,7 +552,7 @@ private fun PdfPageImage(doc: PdfDoc, index: Int, widthPx: Int) {
         .border(1.dp, ViewerPageBorder, RoundedCornerShape(8.dp)),
       contentAlignment = Alignment.Center
     ) {
-      CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(24.dp), color = DeepBlue)
+      CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(24.dp), color = BrandPrimary)
     }
   }
 }
@@ -627,7 +627,7 @@ private fun ZoomBox(
 @Composable
 internal fun LoadingIndicator() {
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-    CircularProgressIndicator(color = DeepBlue)
+    CircularProgressIndicator(color = BrandPrimary)
   }
 }
 
@@ -884,7 +884,7 @@ private fun ReadingCard(text: String, label: String?) {
       if (label != null) {
         Text(
           label.uppercase(),
-          color = DeepBlue,
+          color = BrandPrimary,
           style = MaterialTheme.typography.labelSmall,
           fontWeight = FontWeight.Bold
         )
@@ -913,7 +913,7 @@ private fun AnalysisPill(analysis: ViewerAnalysis, modifier: Modifier = Modifier
   }
   Surface(
     shape = RoundedCornerShape(50),
-    color = DeepBlue,
+    color = BrandPrimary,
     shadowElevation = 10.dp,
     modifier = modifier
       .clip(RoundedCornerShape(50))

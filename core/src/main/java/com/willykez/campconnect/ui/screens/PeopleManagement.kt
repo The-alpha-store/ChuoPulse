@@ -70,7 +70,7 @@ import com.willykez.campconnect.ui.components.PickerItem
 import com.willykez.campconnect.ui.components.PickerSheet
 import com.willykez.campconnect.ui.components.SheetButtons
 import com.willykez.campconnect.ui.theme.DangerRed
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.WarmAmber
 import com.willykez.campconnect.viewmodel.CampusViewModel
@@ -109,7 +109,7 @@ fun PeopleManagementTab(viewModel: CampusViewModel, modifier: Modifier = Modifie
   Column(modifier = modifier.fillMaxSize()) {
     ScrollableTabRow(
       selectedTabIndex = tab.ordinal, edgePadding = 0.dp,
-      containerColor = MaterialTheme.colorScheme.surface, contentColor = DeepBlue
+      containerColor = MaterialTheme.colorScheme.surface, contentColor = BrandPrimary
     ) {
       PeopleTab.values().forEach { t ->
         val count = when (t) {
@@ -197,17 +197,17 @@ fun PeopleManagementTab(viewModel: CampusViewModel, modifier: Modifier = Modifie
     when (tab) {
       PeopleTab.STUDENTS -> Button(
         onClick = { adding = Role.STUDENT }, enabled = programmes.isNotEmpty(),
-        shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.fillMaxWidth().height(52.dp).testTag("people_add_student")
       ) { Icon(Icons.Default.Add, null); Spacer(Modifier.width(8.dp)); Text(viewModel.t("Add student", "Ongeza mwanafunzi"), fontWeight = FontWeight.SemiBold) }
       PeopleTab.REPS -> Button(
         onClick = { choosingReps = true }, enabled = selected != null,
-        shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.fillMaxWidth().height(52.dp).testTag("people_choose_reps")
       ) { Icon(Icons.Default.Star, null); Spacer(Modifier.width(8.dp)); Text(viewModel.t("Choose from $selectedName", "Chagua kutoka $selectedName"), fontWeight = FontWeight.SemiBold) }
       PeopleTab.LECTURERS -> Button(
         onClick = { adding = Role.LECTURER },
-        shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+        shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
         modifier = Modifier.fillMaxWidth().height(52.dp).testTag("people_add_lecturer")
       ) { Icon(Icons.Default.Add, null); Spacer(Modifier.width(8.dp)); Text(viewModel.t("Add lecturer", "Ongeza mhadhiri"), fontWeight = FontWeight.SemiBold) }
       PeopleTab.ADMINS -> Text(
@@ -260,7 +260,7 @@ private fun PersonRow(p: ManagedPerson, onClick: () -> Unit) {
           maxLines = 1, overflow = TextOverflow.Ellipsis
         )
       }
-      if (p.isClassRep) Pill("REP", DeepBlue)
+      if (p.isClassRep) Pill("REP", BrandPrimary)
       StatusPill(p.status)
       Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
@@ -269,8 +269,8 @@ private fun PersonRow(p: ManagedPerson, onClick: () -> Unit) {
 
 @Composable
 internal fun Avatar(name: String) {
-  Box(Modifier.size(40.dp).clip(CircleShape).background(DeepBlue.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
-    Text(name.trim().split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.take(1).uppercase() }.ifBlank { "?" }, color = DeepBlue, fontWeight = FontWeight.Bold)
+  Box(Modifier.size(40.dp).clip(CircleShape).background(BrandPrimary.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
+    Text(name.trim().split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.take(1).uppercase() }.ifBlank { "?" }, color = BrandPrimary, fontWeight = FontWeight.Bold)
   }
 }
 
@@ -286,7 +286,7 @@ private fun Pill(text: String, color: Color) {
 private fun StatusPill(status: String) {
   when (status) {
     "suspended" -> Pill("PAUSED", WarmAmber)
-    "pending" -> Pill("PENDING", DeepBlue)
+    "pending" -> Pill("PENDING", BrandPrimary)
     "rejected" -> Pill("OFF", DangerRed)
   }
 }
@@ -319,7 +319,7 @@ private fun ClassRepChooserSheet(viewModel: CampusViewModel, programmeName: Stri
         ) { Text(viewModel.t("Remove", "Ondoa")) }
         else Button(
           onClick = { scope.launch { busy = m.id; viewModel.setPersonClassRep(m.id, true); busy = null } },
-          enabled = busy == null, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = DeepBlue)
+          enabled = busy == null, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
         ) { Text(viewModel.t("Make rep", "Mteue")) }
       }
     }

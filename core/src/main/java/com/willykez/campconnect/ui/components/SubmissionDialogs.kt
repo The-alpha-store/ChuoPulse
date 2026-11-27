@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.willykez.campconnect.data.model.AttachmentFile
 import com.willykez.campconnect.data.model.DeadlineItem
 import com.willykez.campconnect.data.model.StudentSubmission
-import com.willykez.campconnect.ui.theme.DeepBlue
+import com.willykez.campconnect.ui.theme.BrandPrimary
 import com.willykez.campconnect.ui.theme.SuccessGreen
 import com.willykez.campconnect.ui.theme.WarmAmber
 
@@ -84,7 +84,7 @@ fun SubmitWorkDialog(
           text = "${deadline.courseCode}: ${deadline.title}",
           style = MaterialTheme.typography.titleSmall,
           fontWeight = FontWeight.Bold,
-          color = DeepBlue
+          color = BrandPrimary
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
@@ -213,7 +213,7 @@ fun GradeSubmissionDialog(
 
         Button(
           onClick = { onPreviewDocument(submission.attachment) },
-          colors = ButtonDefaults.buttonColors(containerColor = DeepBlue),
+          colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
           modifier = Modifier.testTag("btn_inspect_submission_file")
         ) {
           Icon(Icons.Default.Visibility, contentDescription = "Inspect", modifier = Modifier.size(16.dp))
