@@ -44,14 +44,14 @@ jobs:
           [ -n "$AI_PROVIDER" ] && args="$args AI_PROVIDER=$AI_PROVIDER"
           [ -n "$AI_MODEL" ]    && args="$args AI_MODEL=$AI_MODEL"
           [ -n "$CLEANUP_SECRET" ] && args="$args CLEANUP_SECRET=$CLEANUP_SECRET"
-          if [ -n "$args" ]; then supabase secrets set $args; else echo "No optional secrets set."; fi
+          if [ -n "$args" ]; then supabase secrets set --yes $args; else echo "No optional secrets set."; fi
 
       - name: Deploy Edge Functions
         run: |
-          supabase functions deploy admin-create-user
-          supabase functions deploy admin-manage-user
-          supabase functions deploy campus-wipe-files
-          supabase functions deploy ai-analyze
-          supabase functions deploy storage-cleanup
-          supabase functions deploy ai-timetable
-          supabase functions deploy confirm-signup --no-verify-jwt
+          supabase functions deploy admin-create-user --yes
+          supabase functions deploy admin-manage-user --yes
+          supabase functions deploy campus-wipe-files --yes
+          supabase functions deploy ai-analyze --yes
+          supabase functions deploy storage-cleanup --yes
+          supabase functions deploy ai-timetable --yes
+          supabase functions deploy confirm-signup --yes --no-verify-jwt
