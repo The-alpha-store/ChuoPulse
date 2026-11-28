@@ -38,12 +38,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -119,8 +119,17 @@ fun ReportsScreen(viewModel: CampusViewModel, modifier: Modifier = Modifier) {
     }
   }
 
-  val programmeCourses = remember(user.universityId, loading) { viewModel.campusProgrammeCourses() }
-  val titles = remember(user.universityId, loading) { viewModel.campusCourseTitles() }
+  // Derived locally from the loaded people so we don't depend on view-model helpers.
+  // ReportPerson exposes `programme: String` and `courses: List<String>`.
+  val programmeCourses: Map<String, List<String>> = remember(people) {
+    people
+      .filter { it.isStudent }
+      .groupBy { it.programme }
+      .mapValues { (_, list) -> list.flatMap { it.courses }.distinct() }
+  }
+  val titles: Map<String, String> = remember(people) {
+    people.flatMap { it.courses }.distinct().associateWith { it }
+  }
   val campusName = universities.firstOrNull { it.id == user.universityId }?.name ?: "ChuoPulse"
 
   val items: List<ReportItem> = when {
