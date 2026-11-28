@@ -30,7 +30,7 @@ jobs:
 
       - name: Apply migrations
         if: ${{ inputs.push_database }}
-        run: supabase db push
+        run: supabase db push --remote
 
       - name: Set AI secrets (only the ones that exist)
         env:
