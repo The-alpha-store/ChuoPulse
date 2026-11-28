@@ -979,7 +979,11 @@ class CampusRepository {
       rooms = catalog.roomsFor(uni).toSet(),
       sessions = _sessions.value.filter { it.status != SessionStatus.CANCELLED }.map {
         SessionRef(baseCourse(it.courseCode), it.lecturerId, it.dayOfWeek, it.startTime.take(5), it.endTime.take(5), it.venue)
-      }
+      },
+      teaching = campusLecturers().flatMap { l -> l.teachesCourses.map { it to LecturerRef(l.id, l.fullName) } }
+        .groupBy({ it.first }, { it.second }),
+      programmeCourses = catalog.catalogFor(uni),
+      titles = catalog.coursesFor(uni)
     )
   }
 

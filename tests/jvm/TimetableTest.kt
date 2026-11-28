@@ -1,6 +1,9 @@
 import com.willykez.campconnect.data.docs.*
 import org.json.JSONObject
 
+/** Keeps the test independent of how the importer is organised. */
+object TableImportProbe { fun parse(text: String, ctx: CatalogContext): JSONObject? = TimetableTableParser.parse(text, ctx) }
+
 var pass = 0; var fail = 0
 fun check(n: String, ok: Boolean) { if (ok) pass++ else { fail++; println("FAIL $n") } }
 fun found(m: LecturerMatch) = (m as? LecturerMatch.Found)?.ref?.id
@@ -88,6 +91,39 @@ fun main() {
   val b = TimetableText.fromBlocks(listOf(DocBlock.Heading(1, "Year 2"), DocBlock.Paragraph("Semester One"), DocBlock.ListItem("Bring ID", 0), DocBlock.Table(listOf(listOf("Day", "Venue"), listOf("Mon", "LH1\nBlock A")))))
   check("blocks -> headings, bullets, flattened table cells", b.contains("# Year 2") && b.contains("- Bring ID") && b.contains("Day | Venue") && b.contains("Mon | LH1 Block A"))
   check("text is capped", TimetableText.fromSheets(listOf(SheetData("x", List(5000) { listOf("a".repeat(50)) }))).length <= TimetableText.MAX_CHARS)
+
+  // ---- table importer: Day, Time, Course Code, Course Name, Venue
+  val ctx2 = CatalogContext(
+    programmes = setOf("BSc Computer Science", "Business Information Technology"), courses = setOf("CS210"), lecturers = lecs,
+    rooms = emptySet(), sessions = emptyList(),
+    teaching = mapOf("CS210" to listOf(LecturerRef("l1", "John Mwita"))),
+    programmeCourses = mapOf("BSc Computer Science" to setOf("CS210", "CS220"), "Business Information Technology" to setOf("BIT101")),
+    titles = mapOf("CS210" to "Databases")
+  )
+  val table = "Day | Time | Course Code | Course Name | Venue\n---|---|---|---|---\nFriday | 08:00-10:00 | CS210 | Databases | LH1\n" +
+    "Monday | 2:00 PM - 4:00 PM | cs 301 | Operating Systems | Lab 2\nTuesday | 10-12 | BIT 102 | Accounting | LH3\n"
+  val tj = TableImportProbe.parse(table, ctx2)
+  check("table: parsed 3 sessions, header and separator skipped", tj != null && tj.getJSONArray("sessions").length() == 3)
+  val ts = tj!!.getJSONArray("sessions")
+  check("table: Friday is day 5 at 08:00-10:00 in LH1", ts.getJSONObject(0).let { it.getInt("day") == 5 && it.getString("start") == "08:00" && it.getString("end") == "10:00" && it.getString("venue") == "LH1" })
+  check("table: the one lecturer of a known course is picked", ts.getJSONObject(0).getString("lecturer") == "John Mwita")
+  check("table: 2:00 PM - 4:00 PM becomes 14:00-16:00", ts.getJSONObject(1).let { it.getString("start") == "14:00" && it.getString("end") == "16:00" })
+  check("table: bare 10-12 stays morning", ts.getJSONObject(2).let { it.getString("start") == "10:00" && it.getString("end") == "12:00" })
+  check("table: code 'cs 301' becomes CS301", ts.getJSONObject(1).getString("course") == "CS301")
+  val newCourses = tj.getJSONArray("courses")
+  check("table: only unknown courses are added, with the name from the file", newCourses.length() == 2 && newCourses.getJSONObject(0).getString("title") == "Operating Systems")
+  check("table: programme auto-detected from the code letters", newCourses.getJSONObject(0).getString("programme") == "BSc Computer Science")
+  check("table: programme auto-detected for another code", newCourses.getJSONObject(1).getString("programme") == "Business Information Technology")
+  val tp = TimetableLogic.parse(tj, ctx2)
+  check("table: feeds the same review step (known course, lecturer resolved)", tp.sessions[0].lecturerId == "l1" && tp.sessions[0].willApply)
+  check("table: new course without a lecturer must be chosen", tp.sessions[1].blocked)
+  val free = TableImportProbe.parse("Wednesday 9:00 - 11:00 CS210 Databases LH2", ctx2)
+  check("free line: day, time, code, name and venue", free != null && free.getJSONArray("sessions").getJSONObject(0).let { it.getInt("day") == 3 && it.getString("start") == "09:00" && it.getString("venue") == "LH2" })
+  val stacked = TableImportProbe.parse("Monday\n08:00-10:00 | CS210 | Databases | LH1\nTuesday\n09:00-11:00 | CS210 | Databases | LH1", ctx2)
+  check("day on its own line applies to the rows under it", stacked != null && stacked.getJSONArray("sessions").length() == 2 && stacked.getJSONArray("sessions").getJSONObject(1).getInt("day") == 2)
+  check("text that is not a timetable falls through to the AI", TableImportProbe.parse("Welcome to the faculty.\nPlease read the rules.", ctx2) == null)
+  val headed = TableImportProbe.parse("# Business Information Technology Year 1\nFriday | 08:00-10:00 | XYZ500 | Seminar | LH9", ctx2)
+  check("programme named in the heading wins", headed != null && headed.getJSONArray("courses").getJSONObject(0).getString("programme") == "Business Information Technology")
 
   println("TimetableLogic: $pass passed, $fail failed"); System.exit(if (fail == 0) 0 else 1)
 }

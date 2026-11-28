@@ -378,7 +378,7 @@ fun PersonManageSheet(
   }
 
   when (mode) {
-    "edit" -> EditPersonSheet(viewModel, role, name, number, programmeId, department, programmes, error, busy, { mode = "" }) { n, num, prog, dep ->
+    "edit" -> EditPersonSheet(viewModel, role, name, number, programmeId, department, programmes, error, busy, { mode = "" }, { sx -> scope.launch { viewModel.setPersonSex(id, sx) } }) { n, num, prog, dep ->
       run { viewModel.editPerson(id, n, num, prog, dep) }
     }
     "password" -> ResetPasswordSheet(viewModel, name, error, busy, { mode = "" }) { pw -> run { viewModel.resetPersonPassword(id, pw) } }
@@ -432,8 +432,10 @@ private fun ActionRow(icon: ImageVector, label: String, tag: String, color: Colo
 private fun EditPersonSheet(
   viewModel: CampusViewModel, role: String, name: String, number: String, programmeId: String?, department: String,
   programmes: List<ProgrammeRef>, error: String?, busy: Boolean, onDismiss: () -> Unit,
+  onSex: (String) -> Unit,
   onSave: (String, String, String?, String?) -> Unit
 ) {
+  var sex by remember { mutableStateOf<String?>(null) }
   var n by remember { mutableStateOf(name) }
   var num by remember { mutableStateOf(number) }
   var prog by remember { mutableStateOf(programmeId) }
@@ -456,6 +458,15 @@ private fun EditPersonSheet(
         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
     } else {
       SheetField(dep, { dep = it }, viewModel.t("Department", "Idara"), "edit_department")
+    }
+    if (role != "admin") {
+      Spacer(Modifier.height(10.dp))
+      Text(viewModel.t("Sex (used in reports). Saved when you tap a choice.", "Jinsia (hutumika kwenye ripoti). Huhifadhiwa ukichagua."), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf("female" to viewModel.t("Female", "Mwanamke"), "male" to viewModel.t("Male", "Mwanaume")).forEach { (id, label) ->
+          FilterChip(selected = sex == id, onClick = { sex = id; onSex(id) }, label = { Text(label) }, modifier = Modifier.testTag("edit_sex_$id"))
+        }
+      }
     }
     error?.let { Spacer(Modifier.height(8.dp)); Text(it, color = DangerRed, style = MaterialTheme.typography.bodySmall) }
   }

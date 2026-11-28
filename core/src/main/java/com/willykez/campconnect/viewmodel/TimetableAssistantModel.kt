@@ -8,6 +8,7 @@ import com.willykez.campconnect.data.docs.PSession
 import com.willykez.campconnect.data.docs.TimetableAiClient
 import com.willykez.campconnect.data.docs.TimetableLogic
 import com.willykez.campconnect.data.docs.TimetableProposal
+import com.willykez.campconnect.data.docs.TimetableTableParser
 import com.willykez.campconnect.data.docs.TimetableSource
 import com.willykez.campconnect.data.repository.CampusRepository
 import kotlinx.coroutines.CoroutineScope
@@ -58,6 +59,13 @@ class TimetableAssistantModel(
       }
       if (text.isBlank()) {
         _phase.value = AssistantPhase.Failed("No text was found in that file.")
+        return@launch
+      }
+      // A table in the format Day, Time, Course Code, Course Name, Venue is read here, without the AI.
+      val table = TimetableTableParser.parse(text, ctx)
+      if (table != null) {
+        val proposal = TimetableLogic.parse(table, ctx)
+        _phase.value = if (proposal.isEmpty) AssistantPhase.Failed("No courses or sessions were found in that file.") else AssistantPhase.Review(proposal, name)
         return@launch
       }
       _phase.value = AssistantPhase.Working("The AI is reading the timetable")

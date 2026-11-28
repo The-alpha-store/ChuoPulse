@@ -1,5 +1,6 @@
 package com.willykez.campconnect.data.repository
 
+import com.willykez.campconnect.data.reports.ReportPerson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -105,6 +106,34 @@ class PeopleAdmin(private val remote: RemoteAdmin) {
     _people.value = out
     return true
   }
+
+  /** The people this account may put in a report. The database decides: a campus administrator gets the campus, a lecturer only their own students. */
+  suspend fun loadReportPeople(): List<ReportPerson>? {
+    val r = remote.rpcCall("report_people", JSONObject())
+    if (!r.ok) return null
+    val rows = runCatching { JSONArray(r.body) }.getOrNull() ?: return null
+    val out = ArrayList<ReportPerson>()
+    rows.each { o ->
+      out += ReportPerson(
+        id = o.s("person_id"), name = o.s("person_name"), email = o.s("person_email"), role = o.s("person_role"),
+        number = o.s("person_number"), sex = o.s("person_sex"), programme = o.s("person_programme"),
+        department = o.s("person_department"), cohort = o.s("person_cohort"),
+        courses = o.s("person_courses").split(',').map { it.trim() }.filter { it.isNotEmpty() }
+      )
+    }
+    return out
+  }
+
+  private fun sexArg(sex: String?): Any = sex ?: JSONObject.NULL
+
+  suspend fun setMySex(sex: String?): PeopleResult =
+    done(remote.rpcCall("set_my_sex", JSONObject().put("p_sex", sexArg(sex))))
+
+  suspend fun setSex(id: String, sex: String?): PeopleResult =
+    done(remote.rpcCall("admin_set_sex", JSONObject().put("p_user", id).put("p_sex", sexArg(sex))))
+
+  suspend fun setSexByEmail(email: String, sex: String): PeopleResult =
+    done(remote.rpcCall("admin_set_sex_by_email", JSONObject().put("p_email", email.trim().lowercase()).put("p_sex", sex)))
 
   suspend fun loadProgrammes(universityUuid: String?): Boolean {
     val filter = if (universityUuid != null) "&university_id=eq.$universityUuid" else ""

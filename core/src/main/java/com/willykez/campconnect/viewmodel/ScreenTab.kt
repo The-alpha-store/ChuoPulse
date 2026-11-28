@@ -9,5 +9,6 @@ enum class ScreenTab {
   SUBMISSIONS,
   PROFILE,
   ADMIN,
-  NOTIFICATIONS
+  NOTIFICATIONS,
+  REPORTS
 }

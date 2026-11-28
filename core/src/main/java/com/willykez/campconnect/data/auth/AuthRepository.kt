@@ -299,7 +299,8 @@ class AuthRepository(
       cohort = row.text("cohort"),
       requestedRole = requested,
       isPlatformAdmin = platform,
-      isClassRep = row.optBoolean("is_class_rep")
+      isClassRep = row.optBoolean("is_class_rep"),
+      sex = row.text("sex")
     )
   }
 

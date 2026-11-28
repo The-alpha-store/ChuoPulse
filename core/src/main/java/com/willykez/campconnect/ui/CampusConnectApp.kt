@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
@@ -302,6 +303,14 @@ fun CampusMainApp(viewModel: CampusViewModel) {
                   onClick = { menuOpen = false; viewModel.setTab(ScreenTab.PROFILE) },
                   modifier = Modifier.testTag("menu_profile")
                 )
+                if (Backend.appKind != AppKind.OWNER) {
+                  DropdownMenuItem(
+                    text = { Text(viewModel.t("Reports (PDF)", "Ripoti (PDF)")) },
+                    leadingIcon = { Icon(Icons.Default.Description, contentDescription = null) },
+                    onClick = { menuOpen = false; viewModel.setTab(ScreenTab.REPORTS) },
+                    modifier = Modifier.testTag("menu_reports")
+                  )
+                }
                 if (Backend.appKind != AppKind.ADMIN) {
                   DropdownMenuItem(
                     text = { Text(viewModel.t("Submissions", "Kazi zilizowasilishwa")) },
@@ -453,6 +462,10 @@ fun CampusMainApp(viewModel: CampusViewModel) {
           )
 
           ScreenTab.NOTIFICATIONS -> NotificationsScreen(
+            viewModel = viewModel
+          )
+
+          ScreenTab.REPORTS -> ReportsScreen(
             viewModel = viewModel
           )
         }

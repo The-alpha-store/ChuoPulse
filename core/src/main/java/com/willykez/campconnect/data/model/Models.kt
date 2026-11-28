@@ -86,7 +86,9 @@ data class UserProfile(
   val isClassRep: Boolean = false,
   val enrolledCourses: Set<String> = emptySet(),
   val teachesCourses: Set<String> = emptySet(),
-  val avatarInitials: String = fullName.split(" ").mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString("")
+  val avatarInitials: String = fullName.split(" ").mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString(""),
+  /** "female", "male" or null when not set. Used for reports. */
+  val sex: String? = null
 )
 
 data class ClassSession(

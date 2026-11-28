@@ -19,7 +19,13 @@ data class CatalogContext(
   val courses: Set<String>,
   val lecturers: List<LecturerRef>,
   val rooms: Set<String>,
-  val sessions: List<SessionRef>
+  val sessions: List<SessionRef>,
+  /** Course code -> lecturers who teach it (used by the table importer to pick the lecturer). */
+  val teaching: Map<String, List<LecturerRef>> = emptyMap(),
+  /** Programme -> its course codes (used to detect the programme of a new course). */
+  val programmeCourses: Map<String, Set<String>> = emptyMap(),
+  /** Course code -> title. */
+  val titles: Map<String, String> = emptyMap()
 )
 
 data class Issue(val text: String, val blocking: Boolean)

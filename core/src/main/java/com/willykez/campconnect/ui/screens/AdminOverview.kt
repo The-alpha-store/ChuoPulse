@@ -257,7 +257,14 @@ fun AdminMessagesTab(viewModel: CampusViewModel, modifier: Modifier = Modifier) 
   )
 }
 
-private data class BulkRow(val name: String, val email: String, val number: String, val password: String, var error: String? = null, var done: Boolean = false)
+/** "F", "female", "mwanamke" -> "female"; "M", "male", "mwanaume" -> "male"; anything else -> null. */
+private fun bulkSex(word: String): String? = when (word.trim().lowercase()) {
+  "f", "female", "mwanamke", "ke" -> "female"
+  "m", "male", "mwanaume", "me" -> "male"
+  else -> null
+}
+
+private data class BulkRow(val name: String, val email: String, val number: String, val password: String, val sex: String = "", var error: String? = null, var done: Boolean = false)
 
 @Composable
 fun BulkAddSheet(viewModel: CampusViewModel, universityId: String, role: Role, onDismiss: () -> Unit) {
@@ -274,13 +281,17 @@ fun BulkAddSheet(viewModel: CampusViewModel, universityId: String, role: Role, o
 
   fun parse(): List<BulkRow> = text.lines().map { it.trim() }.filter { it.isNotBlank() }.map { line ->
     val parts = line.split(',', ';', '\t').map { it.trim() }
-    BulkRow(parts.getOrElse(0) { "" }, parts.getOrElse(2) { "" }.lowercase(), parts.getOrElse(1) { "" }, parts.getOrNull(3)?.takeIf { it.length >= 8 } ?: generatePassword())
+    // Columns 4 and 5 are optional and may come in either order: a password (8+ characters) and/or the sex (F, M, female, male).
+    val extra = parts.drop(3)
+    val sexWord = extra.firstOrNull { bulkSex(it) != null }?.let { bulkSex(it) }.orEmpty()
+    val password = extra.firstOrNull { bulkSex(it) == null && it.length >= 8 } ?: generatePassword()
+    BulkRow(parts.getOrElse(0) { "" }, parts.getOrElse(2) { "" }.lowercase(), parts.getOrElse(1) { "" }, password, sexWord)
   }
 
   AppBottomSheet(
     onDismissRequest = onDismiss,
     title = if (role == Role.STUDENT) viewModel.t("Add many students", "Ongeza wanafunzi wengi") else viewModel.t("Add many lecturers", "Ongeza wahadhiri wengi"),
-    subtitle = viewModel.t("One person per line: name, number, email", "Mtu mmoja kwa mstari: jina, namba, barua pepe"),
+    subtitle = viewModel.t("One person per line: name, number, email, sex (optional)", "Mtu mmoja kwa mstari: jina, namba, barua pepe, jinsia (hiari)"),
     tag = "bulk_add_sheet",
     footer = {
       if (results.isEmpty()) SheetButtons(
@@ -293,6 +304,7 @@ fun BulkAddSheet(viewModel: CampusViewModel, universityId: String, role: Role, o
             rows.forEach { r ->
               val err = viewModel.addCampusUser(universityId, role, r.name, r.email, r.number, if (needsProgramme) programmeName else null, r.password)
               r.error = err; r.done = err == null
+              if (err == null && r.sex.isNotEmpty()) viewModel.setSexForEmail(r.email, r.sex)
               progress += 1
               results = results.toList()
             }
@@ -318,10 +330,10 @@ fun BulkAddSheet(viewModel: CampusViewModel, universityId: String, role: Role, o
       Spacer(Modifier.height(8.dp))
       OutlinedTextField(
         text, { text = it }, minLines = 6, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().testTag("bulk_text"),
-        placeholder = { Text("Amina Juma, 2024/BIT/0123, amina@mail.com\nJohn Mushi, 2024/BIT/0124, john@mail.com") }
+        placeholder = { Text("Amina Juma, 2024/BIT/0123, amina@mail.com, F\nJohn Mushi, 2024/BIT/0124, john@mail.com, M") }
       )
       Text(
-        viewModel.t("A password is made for each person. Add a 4th column to set your own (8+ characters). You can copy them all afterwards.", "Nenosiri hutengenezwa kwa kila mtu. Ongeza safu ya 4 kuweka lako (herufi 8+). Unaweza kuzinakili zote baadaye."),
+        viewModel.t("A password is made for each person. Add columns to set the sex (F or M) and/or your own password (8+ characters). You can copy them all afterwards.", "Nenosiri hutengenezwa kwa kila mtu. Ongeza safu kuweka jinsia (F au M) na/au nenosiri lako (herufi 8+). Unaweza kuzinakili zote baadaye."),
         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp)
       )
     } else {
